@@ -4,6 +4,9 @@ from src.utils import get_base64
 st.set_page_config(page_title="SRKW Salmon Signals - Overview", layout="wide")
 
 # ---- Load and convert background image to base64 ----
+import os
+
+print(os.getcwd())
 img_base64 = get_base64(
     f"../demo_app/assets/lachlan_orca_image.jpg"
 )  # Your local image

@@ -3,11 +3,6 @@
 import streamlit as st
 
 # ---- Load and convert background image to base64 ----
-from pathlib import Path
-
-# Get absolute path to the directory this script lives in
-BASE_DIR = Path(__file__).parent.parent.parent.resolve()
-
 st.set_page_config(
     page_title="First app",
     page_icon=":material/home:",
@@ -20,31 +15,31 @@ st.set_page_config(
 pages = {
     "Overview": [
         st.Page(
-            f"{BASE_DIR}/pages/0_Overview.py",
+            f"../demo_app/pages/0_Overview.py",
             title="Overview",
             icon=":material/home:",
         )
     ],
     "Analysis": [
         st.Page(
-            f"{BASE_DIR}/pages/1_Ballard_Locks.py",
+            f"../demo_app/pages/1_Ballard_Locks.py",
             title="Ballard Locks",
             icon=":material/water:",
         ),
         st.Page(
-            f"{BASE_DIR}/pages/2_Columbia_River.py",
+            f"../demo_app/pages/2_Columbia_River.py",
             title="Columbia River",
             icon=":material/water:",
         ),
         st.Page(
-            f"{BASE_DIR}/pages/3_Fraser_River.py",
+            f"../demo_app/pages/3_Fraser_River.py",
             title="Fraser River",
             icon=":material/water:",
         ),
     ],
     "About": [
         st.Page(
-            f"{BASE_DIR}/pages/4_About.py",
+            f"../demo_app/pages/4_About.py",
             title="About",
             icon=":material/info:",
         )

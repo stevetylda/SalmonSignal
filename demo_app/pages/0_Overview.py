@@ -4,13 +4,8 @@ from src.utils import get_base64
 st.set_page_config(page_title="SRKW Salmon Signals - Overview", layout="wide")
 
 # ---- Load and convert background image to base64 ----
-from pathlib import Path
-
-# Get absolute path to the directory this script lives in
-BASE_DIR = Path(__file__).parent.parent.parent.resolve()
-
 img_base64 = get_base64(
-    f"{BASE_DIR}/demo_app/assets/lachlan_orca_image.jpg"
+    f"../demo_app/assets/lachlan_orca_image.jpg"
 )  # Your local image
 
 # ---- CSS Styling ----

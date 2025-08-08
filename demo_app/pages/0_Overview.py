@@ -9,7 +9,7 @@ import os
 base_image_path_1 = f"../demo_app/assets/lachlan_orca_image.jpg"
 base_image_path_2 = f"./demo_app/assets/lachlan_orca_image.jpg"
 
-if os.path.exist(base_image_path_1):
+if os.path.exists(base_image_path_1):
     img_path = base_image_path_1
 elif os.path.exists(base_image_path_2):
     img_path = base_image_path_2

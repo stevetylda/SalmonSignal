@@ -8,7 +8,7 @@ from streamlit_folium import st_folium
 st.set_page_config(page_title="Columbia River Analysis", layout="wide")
 
 # Set Page Title
-st.title("Salmon & Ecosystem Dynamics - Columbia River")
+st.title("Columbia River - Salmon & Ecosystem Dynamics")
 
 # Get Sub-Page Selection
 current_page = option_menu(

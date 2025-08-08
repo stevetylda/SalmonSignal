@@ -5,7 +5,7 @@ import folium
 from streamlit_folium import st_folium
 
 # Set Page Parameters
-st.set_page_config(page_title="Fraser River Analysis", layout="wide")
+st.set_page_config(page_title="British Columbia Coastal Analysis", layout="wide")
 
 # Set Page Title
-st.title("Fraser River - Salmon & Ecosystem Dynamics")
+st.title("British Columbia Coast - Salmon & Ecosystem Dynamics")

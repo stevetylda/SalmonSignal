@@ -20,7 +20,7 @@ pages = {
             icon=":material/home:",
         )
     ],
-    "Analysis": [
+    "Analysis - Rivers": [
         st.Page(
             f"../demo_app/pages/1_Ballard_Locks.py",
             title="Ballard Locks",
@@ -36,14 +36,48 @@ pages = {
             title="Fraser River",
             icon=":material/water:",
         ),
-    ],
-    "About": [
         st.Page(
-            f"../demo_app/pages/4_About.py",
-            title="About",
-            icon=":material/info:",
-        )
+            f"../demo_app/pages/4_Sacramento_River.py",
+            title="Sacramento River",
+            icon=":material/water:",
+        ),
     ],
+    "Analysis - Open Ocean": [
+        st.Page(
+            f"../demo_app/pages/5_Coastal_British_Columbia.py",
+            title="Coastal - British Columbia",
+            icon=":material/tsunami:",
+        ),
+        st.Page(
+            f"../demo_app/pages/6_Coastal_California.py",
+            title="Coastal - California",
+            icon=":material/tsunami:",
+        ),
+        st.Page(
+            f"../demo_app/pages/7_Coastal_Oregon.py",
+            title="Coastal - Oregon",
+            icon=":material/tsunami:",
+        ),
+        st.Page(
+            f"../demo_app/pages/8_Coastal_Washington.py",
+            title="Coastal - Washington",
+            icon=":material/tsunami:",
+        ),
+    ],
+    # "Learn More": [
+    #     st.Page(
+    #         f"../demo_app/pages/9_Learn_More.py",
+    #         title="Learn More",
+    #         icon=":material/info:",
+    #     )
+    # ],
+    # "About": [
+    #     st.Page(
+    #         f"../demo_app/pages/10_About.py",
+    #         title="About",
+    #         icon=":material/info:",
+    #     )
+    # ],
 }
 
 # Configure navigation

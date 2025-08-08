@@ -1,0 +1,6 @@
+[theme]
+primaryColor = "#4da3ff"         # your accent color (like links)
+backgroundColor = "#0a1a2f"      # deep navy background
+secondaryBackgroundColor = "#112244"  # a bit lighter navy for panels
+textColor = "#FFFFFF"            # white text
+font = "sans serif"

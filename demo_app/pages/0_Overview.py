@@ -6,10 +6,19 @@ st.set_page_config(page_title="SRKW Salmon Signals - Overview", layout="wide")
 # ---- Load and convert background image to base64 ----
 import os
 
-print(os.getcwd())
-img_base64 = get_base64(
-    f"../demo_app/assets/lachlan_orca_image.jpg"
-)  # Your local image
+base_image_path_1 = f"../demo_app/assets/lachlan_orca_image.jpg"
+base_image_path_2 = f"./demo_app/assets/lachlan_orca_image.jpg"
+
+if os.path.exist(base_image_path_1):
+    img_path = base_image_path_1
+elif os.path.exists(base_image_path_2):
+    img_path = base_image_path_2
+else:
+    print("Image path does not exist")
+    print(os.listdir())
+
+# Open Base Image
+img_base64 = get_base64(img_path)  # Your local image
 
 # ---- CSS Styling ----
 st.markdown(

@@ -4,8 +4,14 @@ from src.utils import get_base64
 st.set_page_config(page_title="SRKW Salmon Signals - Overview", layout="wide")
 
 # ---- Load and convert background image to base64 ----
+from pathlib import Path
 
-img_base64 = get_base64("assets/lachlan_orca_image.jpg")  # Your local image
+# Get absolute path to the directory this script lives in
+BASE_DIR = Path(__file__).parent.parent.parent.resolve()
+
+img_base64 = get_base64(
+    f"{BASE_DIR}/demo_app/assets/lachlan_orca_image.jpg"
+)  # Your local image
 
 # ---- CSS Styling ----
 st.markdown(
@@ -93,20 +99,20 @@ st.markdown(
 .card h4 {{
     margin-top: 0;
     margin-bottom: 12px;
-    color: #f0f0f0; 
-    font-weight: 600; 
+    color: #f0f0f0;
+    font-weight: 600;
 }}
 .card h3 {{
     margin-top: 0;
     margin-bottom: 14px;
-    color: #f0f0f0; 
-    font-weight: 600; 
+    color: #f0f0f0;
+    font-weight: 600;
 }}
 .card h2 {{
     margin-top: 0;
     margin-bottom: 16px;
-    color: #f0f0f0; 
-    font-weight: 600; 
+    color: #f0f0f0;
+    font-weight: 600;
 }}
 .card p {{
     margin-bottom: 0;

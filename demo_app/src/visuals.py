@@ -7,11 +7,103 @@ import os
 # Third-Party Modules
 import folium
 import streamlit as st
+import pandas as pd
 import geopandas as gpd
+import plotly.express as px
+import plotly.graph_objects as go
 from shapely.geometry import mapping
+from streamlit.components.v1 import html
 
 #                                                         #
 # ------------------------------------------------------- #
+
+# ------------------------------------------------------- #
+#                        FUNCTIONS                        #
+
+#############################
+## COLUMBIA RIVER - OVERVIEW
+
+
+def plot_overview_map_columbia(columbia_river_mouth, river_gdf, dams):
+    # Inject CSS to force full-width rendering
+    st.markdown(
+        """
+        <style>
+            /* Reset Streamlit container styles */
+            .block-container, .main, .stApp, div[data-testid="stHorizontalBlock"], 
+            div[data-testid="stTabs"], div[role="tabpanel"], .stHorizontal, .element-container {
+                max-width: 100% !important;
+                width: 100% !important;
+                padding: 1 !important;
+                margin: 1 !important;
+                overflow: visible !important;
+            }
+            /* Ensure map and its container are full-width */
+            .leaflet-container, .folium-map, [id^="map_"] {
+                width: 100% !important;
+                height: 600px !important;
+                margin: 1 !important;
+                padding: 1 !important;
+                position: relative !important;
+            }
+            /* Override flexbox or grid constraints */
+            div[data-testid="stHorizontalBlock"] > div, div[data-testid="stTabs"] > div,
+            .stHorizontal > div {
+                flex: 1 1 100% !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            /* Ensure the wrapper div is full-width */
+            .map-wrapper {
+                width: 100vw !important;
+                max-width: 100% !important;
+                height: 600px !important;
+                margin: 1 !important;
+                padding: 1 !important;
+                overflow: hidden !important;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Create or load Folium map
+    output_file = create_and_save_map(
+        columbia_river_mouth, river_gdf, dams, force_regenerate=False
+    )
+
+    # Read the map HTML
+    try:
+        with open(output_file, "r", encoding="utf-8") as f:
+            map_html = f.read()
+    except Exception as e:
+        st.error(f"Error reading map.html: {e}")
+        st.write("Regenerating map...")
+        output_file = create_and_save_map(
+            columbia_river_mouth, river_gdf, dams, force_regenerate=True
+        )
+        with open(output_file, "r", encoding="utf-8") as f:
+            map_html = f.read()
+
+    # Inject CSS for Leaflet's map container
+    css_fix = """
+    <style>
+    /* Force leaflet map container inside folium HTML to fill parent div */
+    #map { height: 100% !important; width: 100% !important; }
+    html, body { margin: 0; padding: 0; height: 100%; width: 100%; }
+    </style>
+    """
+
+    container = f"""
+    <div style="width: 100vw; min-width: 600px; height: 600px; margin: 0; padding: 0;">
+    {css_fix}
+    {map_html}
+    </div>
+    """
+
+    # Render the map
+    html(container, height=600)
+
 
 #############################
 ## COLUMBIA RIVER ANALYSIS
@@ -79,3 +171,442 @@ def create_and_save_map(columbia_river_mouth, river_gdf, dams, force_regenerate=
         folium.LayerControl().add_to(m)
         m.save(output_path)
     return output_path
+
+
+def plot_plotly_mapbox_time_series(df, color_choice, species_choice):
+    if color_choice == "Normalized Count":
+        color_plot = "DOY_ZSCORE"
+    else:
+        color_plot = "COUNT"
+
+    df = df[df.SPECIES == species_choice]
+
+    fig = px.scatter_mapbox(
+        df,
+        lat="LAT",
+        lon="LON",
+        color=color_plot,
+        hover_name="LOCATION",
+        size=[10] * len(df),
+        hover_data={
+            "DATE": True,
+            "DAM": False,
+            "COUNT": True,
+            "DOY_ZSCORE": True,
+            "LAT": False,
+            "LON": False,
+        },
+        zoom=6,
+        height=600,
+        title="Map - Displaying Count of Salmon at Dams Along the Columbia",
+        animation_frame="DATE",
+        color_continuous_scale="RdBu",  # Red-Blue diverging color scale # or your custom palette
+    )
+
+    # Center the diverging color scale on zero
+    fig.update_traces(marker=dict(colorscale="RdBu", showscale=True))
+
+    fig.update_layout(
+        mapbox_style="open-street-map",
+        margin={"r": 0, "t": 30, "l": 0, "b": 0},
+        coloraxis_colorbar=dict(
+            title=color_choice,  # Title for the color scale
+            tickvals=[
+                -max(df[color_plot].abs()),
+                0,
+                max(df[color_plot].abs()),
+            ],
+            ticktext=[
+                f"-{max(df[color_plot].abs())}",
+                "0",
+                f"{max(df[color_plot].abs())}",
+            ],
+        ),
+    )
+
+    return fig
+
+
+def plot_line_plot_columbia_dams(
+    plot_data, plot_title, x_axis_select, y_axis_select, color_map=None
+):
+    """
+    Create a line plot for Columbia dams data with a date-time filter.
+
+    Args:
+        plot_data (pd.DataFrame): Input DataFrame with columns including UID, x_axis_select, and y_axis_select
+        plot_title (str): Title of the plot
+        x_axis_select (str): Column name for x-axis (expected to be date-time)
+        y_axis_select (str): Column name for y-axis
+        color_map (dict, optional): Dictionary mapping UID to colors
+    """
+    if not isinstance(plot_data, pd.DataFrame):
+        raise ValueError("plot_data must be a pandas DataFrame")
+    if x_axis_select not in plot_data.columns or y_axis_select not in plot_data.columns:
+        raise ValueError("Selected axis columns must exist in the DataFrame")
+    if "UID" not in plot_data.columns:
+        raise ValueError("DataFrame must contain 'UID' column")
+
+    # Ensure x-axis data is in datetime format
+    try:
+        plot_data[x_axis_select] = pd.to_datetime(plot_data[x_axis_select])
+    except Exception as e:
+        raise ValueError(
+            f"x_axis_select column must contain valid date-time data: {str(e)}"
+        )
+
+    fig = go.Figure()
+
+    # Default color cycle
+    default_colors = px.colors.qualitative.Plots
+    if color_map is None:
+        color_map = {
+            uid: default_colors[i % len(default_colors)]
+            for i, uid in enumerate(plot_data["UID"].unique())
+        }
+
+    for val in plot_data["UID"].unique():
+        mask = plot_data["UID"] == val
+        fig.add_scatter(
+            x=plot_data[mask][x_axis_select],
+            y=plot_data[mask][y_axis_select],
+            mode="lines+markers",
+            line=dict(width=2),
+            marker=dict(size=6),
+            name=str(val),
+            line_color=color_map.get(val, "blue"),
+        )
+
+    fig.update_layout(
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        font=dict(family="Segoe UI, Arial, sans-serif", size=12, color="black"),
+        xaxis=dict(
+            type="date",  # Set x-axis to date type
+            title=dict(
+                text=x_axis_select.replace("_", " ").title(),
+                font=dict(color="black", size=14),
+            ),
+            tickfont=dict(color="black"),
+            showgrid=True,
+            gridcolor="lightgray",
+            zeroline=False,
+            showline=True,
+            linecolor="black",
+            ticks="outside",
+            tickcolor="black",
+            ticklen=5,
+            rangeselector=dict(
+                buttons=list(
+                    [
+                        dict(count=1, label="1m", step="month", stepmode="backward"),
+                        dict(count=6, label="6m", step="month", stepmode="backward"),
+                        dict(count=1, label="1y", step="year", stepmode="backward"),
+                        dict(count=5, label="5y", step="year", stepmode="backward"),
+                        dict(step="all", label="All"),
+                    ]
+                ),
+                bgcolor="white",
+                activecolor="lightgray",
+                font=dict(color="black"),
+                x=0,
+                xanchor="left",
+                y=1.1,
+                yanchor="top",
+            ),
+            rangeslider=dict(visible=True),  # Optional: Add a range slider
+            tickformat="%Y-%m-%d",  # Format for date display
+        ),
+        yaxis=dict(
+            title=dict(
+                text=y_axis_select.replace("_", " ").title(),
+                font=dict(color="black", size=14),
+            ),
+            tickfont=dict(color="black"),
+            showgrid=True,
+            gridcolor="lightgray",
+            zeroline=False,
+            showline=True,
+            linecolor="black",
+            ticks="outside",
+            tickcolor="black",
+            ticklen=5,
+        ),
+        legend=dict(
+            bgcolor="rgba(255,255,255,0.8)",
+            bordercolor="lightgray",
+            borderwidth=1,
+            font=dict(color="black", size=11),
+            x=1.02,
+            y=1,
+            xanchor="left",
+            yanchor="top",
+        ),
+        margin=dict(l=50, r=150, t=100, b=50),  # Adjusted top margin for rangeselector
+        title=dict(
+            text=plot_title,
+            font=dict(color="black", size=18, family="Segoe UI, Arial, sans-serif"),
+            x=0.5,
+            xanchor="center",
+        ),
+        hovermode="closest",
+    )
+
+    return fig
+
+
+def plot_bar_plot_columbia_dams(
+    plot_data, plot_title, x_axis_select, y_axis_select, color_map=None
+):
+    """
+    Create a bar plot for Columbia dams data with a date-time filter.
+
+    Args:
+        plot_data (pd.DataFrame): Input DataFrame with columns including UID, x_axis_select, and y_axis_select
+        plot_title (str): Title of the plot
+        x_axis_select (str): Column name for x-axis (expected to be date-time)
+        y_axis_select (str): Column name for y-axis
+        color_map (dict, optional): Dictionary mapping UID to colors
+    """
+    if not isinstance(plot_data, pd.DataFrame):
+        raise ValueError("plot_data must be a pandas DataFrame")
+    if x_axis_select not in plot_data.columns or y_axis_select not in plot_data.columns:
+        raise ValueError("Selected axis columns must exist in the DataFrame")
+    if "UID" not in plot_data.columns:
+        raise ValueError("DataFrame must contain 'UID' column")
+
+    # Ensure x-axis data is in datetime format
+    try:
+        plot_data[x_axis_select] = pd.to_datetime(plot_data[x_axis_select])
+    except Exception as e:
+        raise ValueError(
+            f"x_axis_select column must contain valid date-time data: {str(e)}"
+        )
+
+    fig = go.Figure()
+
+    default_colors = px.colors.qualitative.Plotly
+    if color_map is None:
+        color_map = {
+            uid: default_colors[i % len(default_colors)]
+            for i, uid in enumerate(plot_data["UID"].unique())
+        }
+
+    for val in plot_data["UID"].unique():
+        mask = plot_data["UID"] == val
+        fig.add_bar(
+            x=plot_data[mask][x_axis_select],
+            y=plot_data[mask][y_axis_select],
+            name=str(val),
+            marker_color=color_map.get(val, "blue"),
+            opacity=0.8,
+        )
+
+    fig.update_layout(
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        font=dict(family="Segoe UI, Arial, sans-serif", size=12, color="black"),
+        xaxis=dict(
+            type="date",  # Set x-axis to date type
+            title=dict(
+                text=x_axis_select.replace("_", " ").title(),
+                font=dict(color="black", size=14),
+            ),
+            tickfont=dict(color="black"),
+            showgrid=True,
+            gridcolor="lightgray",
+            zeroline=False,
+            showline=True,
+            linecolor="black",
+            ticks="outside",
+            tickcolor="black",
+            ticklen=5,
+            rangeselector=dict(
+                buttons=list(
+                    [
+                        dict(count=1, label="1m", step="month", stepmode="backward"),
+                        dict(count=6, label="6m", step="month", stepmode="backward"),
+                        dict(count=1, label="1y", step="year", stepmode="backward"),
+                        dict(count=5, label="5y", step="year", stepmode="backward"),
+                        dict(step="all", label="All"),
+                    ]
+                ),
+                bgcolor="white",
+                activecolor="lightgray",
+                font=dict(color="black"),
+                x=0,
+                xanchor="left",
+                y=1.1,
+                yanchor="top",
+            ),
+            rangeslider=dict(visible=True),  # Optional: Add a range slider
+            tickformat="%Y-%m-%d",
+        ),
+        yaxis=dict(
+            title=dict(
+                text=y_axis_select.replace("_", " ").title(),
+                font=dict(color="black", size=14),
+            ),
+            tickfont=dict(color="black"),
+            showgrid=True,
+            gridcolor="lightgray",
+            zeroline=False,
+            showline=True,
+            linecolor="black",
+            ticks="outside",
+            tickcolor="black",
+            ticklen=5,
+        ),
+        legend=dict(
+            bgcolor="rgba(255,255,255,0.8)",
+            bordercolor="lightgray",
+            borderwidth=1,
+            font=dict(color="black", size=11),
+            x=1.02,
+            y=1,
+            xanchor="left",
+            yanchor="top",
+        ),
+        margin=dict(l=50, r=150, t=100, b=50),
+        title=dict(
+            text=plot_title,
+            font=dict(color="black", size=18, family="Segoe UI, Arial, sans-serif"),
+            x=0.5,
+            xanchor="center",
+        ),
+        barmode="group",
+        hovermode="closest",
+    )
+
+    return fig
+
+
+def plot_area_plot_columbia_dams(
+    plot_data, plot_title, x_axis_select, y_axis_select, color_map=None
+):
+    """
+    Create an area plot for Columbia dams data with a date-time filter.
+
+    Args:
+        plot_data (pd.DataFrame): Input DataFrame with columns including UID, x_axis_select, and y_axis_select
+        plot_title (str): Title of the plot
+        x_axis_select (str): Column name for x-axis (expected to be date-time)
+        y_axis_select (str): Column name for y-axis
+        color_map (dict, optional): Dictionary mapping UID to colors
+    """
+    if not isinstance(plot_data, pd.DataFrame):
+        raise ValueError("plot_data must be a pandas DataFrame")
+    if x_axis_select not in plot_data.columns or y_axis_select not in plot_data.columns:
+        raise ValueError("Selected axis columns must exist in the DataFrame")
+    if "UID" not in plot_data.columns:
+        raise ValueError("DataFrame must contain 'UID' column")
+
+    # Ensure x-axis data is in datetime format
+    try:
+        plot_data[x_axis_select] = pd.to_datetime(plot_data[x_axis_select])
+    except Exception as e:
+        raise ValueError(
+            f"x_axis_select column must contain valid date-time data: {str(e)}"
+        )
+
+    fig = go.Figure()
+
+    default_colors = px.colors.qualitative.Plotly
+    if color_map is None:
+        color_map = {
+            uid: default_colors[i % len(default_colors)]
+            for i, uid in enumerate(plot_data["UID"].unique())
+        }
+
+    for val in plot_data["UID"].unique():
+        mask = plot_data["UID"] == val
+        fig.add_scatter(
+            x=plot_data[mask][x_axis_select],
+            y=plot_data[mask][y_axis_select],
+            mode="lines",
+            fill="tozeroy",
+            name=str(val),
+            line_color=color_map.get(val, "blue"),
+            opacity=0.6,
+        )
+
+    fig.update_layout(
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        font=dict(family="Segoe UI, Arial, sans-serif", size=12, color="black"),
+        xaxis=dict(
+            type="date",  # Set x-axis to date type
+            title=dict(
+                text=x_axis_select.replace("_", " ").title(),
+                font=dict(color="black", size=14),
+            ),
+            tickfont=dict(color="black"),
+            showgrid=True,
+            gridcolor="lightgray",
+            zeroline=False,
+            showline=True,
+            linecolor="black",
+            ticks="outside",
+            tickcolor="black",
+            ticklen=5,
+            rangeselector=dict(
+                buttons=list(
+                    [
+                        dict(count=1, label="1m", step="month", stepmode="backward"),
+                        dict(count=6, label="6m", step="month", stepmode="backward"),
+                        dict(count=1, label="1y", step="year", stepmode="backward"),
+                        dict(count=5, label="5y", step="year", stepmode="backward"),
+                        dict(step="all", label="All"),
+                    ]
+                ),
+                bgcolor="white",
+                activecolor="lightgray",
+                font=dict(color="black"),
+                x=0,
+                xanchor="left",
+                y=1.1,
+                yanchor="top",
+            ),
+            rangeslider=dict(visible=True),  # Optional: Add a range slider
+            tickformat="%Y-%m-%d",
+        ),
+        yaxis=dict(
+            title=dict(
+                text=y_axis_select.replace("_", " ").title(),
+                font=dict(color="black", size=14),
+            ),
+            tickfont=dict(color="black"),
+            showgrid=True,
+            gridcolor="lightgray",
+            zeroline=False,
+            showline=True,
+            linecolor="black",
+            ticks="outside",
+            tickcolor="black",
+            ticklen=5,
+        ),
+        legend=dict(
+            bgcolor="rgba(255,255,255,0.8)",
+            bordercolor="lightgray",
+            borderwidth=1,
+            font=dict(color="black", size=11),
+            x=1.02,
+            y=1,
+            xanchor="left",
+            yanchor="top",
+        ),
+        margin=dict(l=50, r=150, t=100, b=50),
+        title=dict(
+            text=plot_title,
+            font=dict(color="black", size=18, family="Segoe UI, Arial, sans-serif"),
+            x=0.5,
+            xanchor="center",
+        ),
+        hovermode="closest",
+    )
+
+    return fig
+
+
+#                                                         #
+# ------------------------------------------------------- #

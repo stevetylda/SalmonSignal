@@ -2,6 +2,8 @@
 *.csv
 *.xlsx
 *.DS_Store
+*.pyc
+*.cython-310.pyc
 data/processed/GIS/inland_rivers/US_Detailed_Water_Bodies/USA_Detailed_Water_Bodies.cpg
 data/processed/GIS/inland_rivers/US_Detailed_Rivers_Lines/9ae73184-d43c-4ab8-940a-c8687f61952f2020328-1-r9gw71.0odx9.shx
 data/processed/GIS/inland_rivers/US_Detailed_Water_Bodies/USA_Detailed_Water_Bodies.prj
@@ -35,3 +37,4 @@ data/processed/FPC_DAM_COUNTS/Priest Rapids_FPC_DAM_COUNTS.parquet
 data/processed/FPC_DAM_COUNTS/Rocky Reach_FPC_DAM_COUNTS.parquet
 data/processed/GIS/marine_zones/WDFW_MARINE_AREAS_LARGE.parquet
 data/processed/GIS/ocean/TERRITORIAL_WATERS.parquet
+demo_app/src/__pycache__/visuals.cpython-310.pyc

@@ -271,7 +271,7 @@ with st.container(key="main_box"):
         "Salmon Signals - Prey Analysis for the Southern Resident Killer Whale (SRKW)"
     )
     st.subheader(
-        "Exploring Salmon Counts, Pinniped Pressure, and Environmental Covariates"
+        "Exploring Salmon Counts, Pinniped Pressure, and Environmental Dynamics"
     )
 
     st.markdown(
@@ -312,7 +312,7 @@ with st.container(key="main_box"):
         st.markdown(
             """
         <div class="card">
-            <h4>Environmental Covariates</h4>
+            <h4>Environment Indicators</h4>
             <p>Exploring factors like temperature, flow, and more.</p>
         </div>
         """,

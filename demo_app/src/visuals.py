@@ -236,12 +236,12 @@ def plot_line_plot_columbia_dams(
     plot_data, plot_title, x_axis_select, y_axis_select, color_map=None
 ):
     """
-    Create a line plot for Columbia dams data without date-time filter.
+    Create a line plot for Columbia dams data.
 
     Args:
         plot_data (pd.DataFrame): Input DataFrame with columns including UID, x_axis_select, and y_axis_select
         plot_title (str): Title of the plot
-        x_axis_select (str): Column name for x-axis (expected to be date-time)
+        x_axis_select (str): Column name for x-axis
         y_axis_select (str): Column name for y-axis
         color_map (dict, optional): Dictionary mapping UID to colors
     """
@@ -252,18 +252,10 @@ def plot_line_plot_columbia_dams(
     if "UID" not in plot_data.columns:
         raise ValueError("DataFrame must contain 'UID' column")
 
-    # Ensure x-axis data is in datetime format
-    try:
-        plot_data[x_axis_select] = pd.to_datetime(plot_data[x_axis_select])
-    except Exception as e:
-        raise ValueError(
-            f"x_axis_select column must contain valid date-time data: {str(e)}"
-        )
-
     fig = go.Figure()
 
     # Default color cycle
-    default_colors = px.colors.qualitative.Plotly
+    default_colors = px.colors.qualitative.Plotly  # Corrected from .Plots
     if color_map is None:
         color_map = {
             uid: default_colors[i % len(default_colors)]
@@ -287,7 +279,6 @@ def plot_line_plot_columbia_dams(
         paper_bgcolor="white",
         font=dict(family="Segoe UI, Arial, sans-serif", size=12, color="black"),
         xaxis=dict(
-            type="date",
             title=dict(
                 text=x_axis_select.replace("_", " ").title(),
                 font=dict(color="black", size=14),
@@ -301,7 +292,6 @@ def plot_line_plot_columbia_dams(
             ticks="outside",
             tickcolor="black",
             ticklen=5,
-            tickformat="%Y-%m-%d",
         ),
         yaxis=dict(
             title=dict(
@@ -328,7 +318,7 @@ def plot_line_plot_columbia_dams(
             xanchor="left",
             yanchor="top",
         ),
-        margin=dict(l=50, r=150, t=80, b=50),  # Adjusted top margin back
+        margin=dict(l=50, r=150, t=80, b=50),
         title=dict(
             text=plot_title,
             font=dict(color="black", size=18, family="Segoe UI, Arial, sans-serif"),
@@ -345,12 +335,12 @@ def plot_bar_plot_columbia_dams(
     plot_data, plot_title, x_axis_select, y_axis_select, color_map=None
 ):
     """
-    Create a bar plot for Columbia dams data without date-time filter.
+    Create a bar plot for Columbia dams data.
 
     Args:
         plot_data (pd.DataFrame): Input DataFrame with columns including UID, x_axis_select, and y_axis_select
         plot_title (str): Title of the plot
-        x_axis_select (str): Column name for x-axis (expected to be date-time)
+        x_axis_select (str): Column name for x-axis
         y_axis_select (str): Column name for y-axis
         color_map (dict, optional): Dictionary mapping UID to colors
     """
@@ -361,17 +351,9 @@ def plot_bar_plot_columbia_dams(
     if "UID" not in plot_data.columns:
         raise ValueError("DataFrame must contain 'UID' column")
 
-    # Ensure x-axis data is in datetime format
-    try:
-        plot_data[x_axis_select] = pd.to_datetime(plot_data[x_axis_select])
-    except Exception as e:
-        raise ValueError(
-            f"x_axis_select column must contain valid date-time data: {str(e)}"
-        )
-
     fig = go.Figure()
 
-    default_colors = px.colors.qualitative.Plotly
+    default_colors = px.colors.qualitative.Plotly  # Corrected from .Plots
     if color_map is None:
         color_map = {
             uid: default_colors[i % len(default_colors)]
@@ -393,7 +375,6 @@ def plot_bar_plot_columbia_dams(
         paper_bgcolor="white",
         font=dict(family="Segoe UI, Arial, sans-serif", size=12, color="black"),
         xaxis=dict(
-            type="date",
             title=dict(
                 text=x_axis_select.replace("_", " ").title(),
                 font=dict(color="black", size=14),
@@ -407,7 +388,6 @@ def plot_bar_plot_columbia_dams(
             ticks="outside",
             tickcolor="black",
             ticklen=5,
-            tickformat="%Y-%m-%d",
         ),
         yaxis=dict(
             title=dict(
@@ -452,12 +432,12 @@ def plot_area_plot_columbia_dams(
     plot_data, plot_title, x_axis_select, y_axis_select, color_map=None
 ):
     """
-    Create an area plot for Columbia dams data without date-time filter.
+    Create an area plot for Columbia dams data.
 
     Args:
         plot_data (pd.DataFrame): Input DataFrame with columns including UID, x_axis_select, and y_axis_select
         plot_title (str): Title of the plot
-        x_axis_select (str): Column name for x-axis (expected to be date-time)
+        x_axis_select (str): Column name for x-axis
         y_axis_select (str): Column name for y-axis
         color_map (dict, optional): Dictionary mapping UID to colors
     """
@@ -468,17 +448,9 @@ def plot_area_plot_columbia_dams(
     if "UID" not in plot_data.columns:
         raise ValueError("DataFrame must contain 'UID' column")
 
-    # Ensure x-axis data is in datetime format
-    try:
-        plot_data[x_axis_select] = pd.to_datetime(plot_data[x_axis_select])
-    except Exception as e:
-        raise ValueError(
-            f"x_axis_select column must contain valid date-time data: {str(e)}"
-        )
-
     fig = go.Figure()
 
-    default_colors = px.colors.qualitative.Plotly
+    default_colors = px.colors.qualitative.Plotly  # Corrected from .Plots
     if color_map is None:
         color_map = {
             uid: default_colors[i % len(default_colors)]
@@ -502,7 +474,6 @@ def plot_area_plot_columbia_dams(
         paper_bgcolor="white",
         font=dict(family="Segoe UI, Arial, sans-serif", size=12, color="black"),
         xaxis=dict(
-            type="date",
             title=dict(
                 text=x_axis_select.replace("_", " ").title(),
                 font=dict(color="black", size=14),
@@ -516,7 +487,6 @@ def plot_area_plot_columbia_dams(
             ticks="outside",
             tickcolor="black",
             ticklen=5,
-            tickformat="%Y-%m-%d",
         ),
         yaxis=dict(
             title=dict(

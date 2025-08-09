@@ -125,50 +125,211 @@ st.markdown(
     margin-bottom: 0;
     color: #c0c0c0;
 }}
-.nav-button {{
-        min-height: 160px;
-        max-width: 400px;
-        width: 100%;
-        margin: 10px auto; /* center horizontally */
-        padding: 24px 20px;
+# .nav-button {{
+#         min-height: 160px;
+#         max-width: 400px;
+#         width: 100%;
+#         margin: 10px auto; /* center horizontally */
+#         padding: 24px 20px;
+#         border-radius: 24px;
+#         border: 2.5px solid #CBD4C2;
+#         background: rgba(20, 30, 60, 0.3);
+#         color: #d0e6ff;
+#         font-weight: 600;
+#         font-size: 17px;
+#         cursor: pointer;
+#         transition: all 0.35s ease;
+#         text-align: center;
+#         box-shadow: none;
+#         display: flex;
+#         flex-direction: column;
+#         justify-content: center;
+#         align-items: center;
+#         text-decoration: none;
+#     }}
+#     .nav-button:hover {{
+#         border-image-source: linear-gradient(120deg, #c1c1c1, #e0e0e0, #c1c1c1);
+#         border-image-slice: 1;
+#         background: rgba(255, 255, 255, 0.15);
+#         color: #ffffff;
+#         box-shadow: 0 5px 28px rgba(255, 255, 255, 0.4);
+#         transform: translateY(-3px);
+#     }}
+#     .nav-button h4 {{
+#         margin: 0 0 10px 0;
+#         color: inherit;
+#     }}
+#     .nav-button p {{
+#         margin: 0;
+#         color: #aac9ff;
+#         font-size: 14px;
+#     }}
+# .nav-button-2 {{
+#     min-height: 160px;
+#     max-width: 400px;
+#     width: 100%;
+#     margin: 10px auto;
+#     padding: 24px 20px;
+#     border-radius: 24px;
+#     border: 2.5px dashed #999999;
+#     background: rgba(255, 255, 255, 0.04);
+#     color: #cccccc;
+#     font-weight: 600;
+#     font-size: 17px;
+#     text-align: center;
+#     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+#     transition: none;
+#     display: flex;
+#     flex-direction: column;
+#     justify-content: center;
+#     align-items: center;
+#     text-decoration: none;
+#     cursor: default;
+#     opacity: 0.7;
+#     }}
+#     .nav-button-2 hover {{
+#         transform: none;
+#         box-shadow: none;
+#         background: rgba(255, 255, 255, 0.04);
+#     }}
+#     .nav-button-2 h4 {{
+#         margin: 0 0 10px 0;
+#         color: inherit;
+#         font-weight: 700;
+#         font-size: 20px;
+#     }}
+#     .nav-button-2 p {{
+#         margin: 0;
+#         color: #aac9ff;
+#         font-size: 14px;
+#     }}
+    /* Gradient Glow Ring on Nav Buttons (both .nav-button and .nav-button-2) */
+    .nav-button, .nav-button-2 {{
+        position: relative;
+        overflow: hidden;
         border-radius: 24px;
-        border: 2.5px solid #CBD4C2;
-        background: rgba(20, 30, 60, 0.3);
-        color: #d0e6ff;
-        font-weight: 600;
-        font-size: 17px;
-        cursor: pointer;
+        padding: 24px 20px;
         transition: all 0.35s ease;
-        text-align: center;
-        box-shadow: none;
+        cursor: pointer;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         text-decoration: none;
+        max-width: 400px;
+        margin: 10px auto;
+        font-weight: 600;
+        font-size: 17px;
+        box-shadow: none;
+        color: #d0e6ff; /* fallback color */
     }}
+
+    /* Glow ring effect */
+    .nav-button::before, .nav-button-2::before {{
+        content: "";
+        position: absolute;
+        inset: -4px;
+        border-radius: 30px;
+        background: linear-gradient(120deg, #89f7fe, #66a6ff, #89f7fe);
+        filter: blur(12px);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: -1;
+    }}
+
+    /* Show glow ring on hover for nav-button */
+    .nav-button:hover::before {{
+        opacity: 0.5;
+    }}
+
+    /* Show glow ring on hover for nav-button-2 */
+    .nav-button-2:hover::before {{
+        opacity: 0.5;
+    }}
+
+    /* Specific styling for nav-button */
+    .nav-button {{
+        background: rgba(20, 30, 60, 0.3);
+        border: 2.5px solid #CBD4C2;
+        color: #d0e6ff;
+    }}
+
     .nav-button:hover {{
-        border-image-source: linear-gradient(120deg, #c1c1c1, #e0e0e0, #c1c1c1);
-        border-image-slice: 1;
         background: rgba(255, 255, 255, 0.15);
         color: #ffffff;
         box-shadow: 0 5px 28px rgba(255, 255, 255, 0.4);
         transform: translateY(-3px);
+        border-image-source: linear-gradient(120deg, #c1c1c1, #e0e0e0, #c1c1c1);
+        border-image-slice: 1;
     }}
-    .nav-button h4 {{
+
+    /* Specific styling for nav-button-2 */
+    .nav-button-2 {{
+        background: rgba(255, 255, 255, 0.04);
+        border: 2.5px dashed #999999;
+        color: #cccccc;
+        cursor: default;
+        opacity: 0.7;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        transition: none;
+    }}
+
+    .nav-button-2:hover {{
+        /* Lets keep hover subtle but still show glow */
+        opacity: 1;
+        cursor: pointer;
+        box-shadow: 0 5px 28px rgba(255, 255, 255, 0.4);
+        transform: translateY(-3px);
+    }}
+
+    /* Headings and paragraph inside nav-buttons */
+    .nav-button h4, .nav-button-2 h4 {{
         margin: 0 0 10px 0;
         color: inherit;
+        font-weight: 700;
+        font-size: 20px;
     }}
-    .nav-button p {{
+    .nav-button p, .nav-button-2 p {{
         margin: 0;
         color: #aac9ff;
         font-size: 14px;
+    }}
+
+    /* Mini status badge */
+    .status-badge {{
+        position: absolute;
+        top: 12px;
+        right: 16px;
+        background-color: #42a5f5;
+        color: white;
+        font-size: 11px;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+        box-shadow: 0 0 8px rgba(66, 165, 245, 0.4);
+        z-index: 1;
+        user-select: none;
+    }}
+
+    /* Fade-in-up animation */
+    @keyframes fadeInUp {{
+    from {{
+        opacity: 0;
+        transform: translateY(24px);
+    }}
+    to {{
+        opacity: 1;
+        transform: translateY(0);
+    }}
+    .nav-button, .nav-button-2 {{
+        animation: fadeInUp 0.6s ease both;
     }}
 </style>
 
 <!-- Background image element -->
 <div id="bg-img"></div>
-""",
+    """,
     unsafe_allow_html=True,
 )
 
@@ -267,11 +428,23 @@ with st.container(key="main_box"):
         )
 
     st.markdown("---")
-    st.header("Available Pages")
+    st.header("Select a Topic to Learn More")
 
-    col7, col8 = st.columns(2)
+    # First Row of Links
+    col7, col8, col9 = st.columns(3)
 
     with col7:
+        st.markdown(
+            """
+            <a href="Ballard_Locks" class="nav-button-2" style="text-decoration:none;">
+                <h4>Ballard Locks</h4>
+                <p>Coming Soon!</p>
+            </a>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with col8:
         st.markdown(
             """
             <a href="Columbia_River" class="nav-button" style="text-decoration:none;">
@@ -282,16 +455,90 @@ with st.container(key="main_box"):
             unsafe_allow_html=True,
         )
 
-    with col8:
+    with col9:
         st.markdown(
             """
-            <a href="About" class="nav-button" style="text-decoration:none;">
-                <h4>About</h4>
-                <p>Learn more about the methodology and data sources.</p>
+            <a href="Fraser_River" class="nav-button-2" style="text-decoration:none;">
+                <h4>Fraser River</h4>
+                <p>Coming Soon!</p>
             </a>
             """,
             unsafe_allow_html=True,
         )
+
+    # Second Row of Links
+    col10, col11, col12 = st.columns(3)
+
+    with col10:
+        st.markdown(
+            """
+            <a href="Sacramento_River" class="nav-button-2" style="text-decoration:none;">
+                <h4>Sacramento River</h4>
+                <p>Coming Soon!</p>
+            </a>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with col11:
+        st.markdown(
+            """
+            <a href="British_Columbia_Coast" class="nav-button-2" style="text-decoration:none;">
+                <h4>Coastal British Columbia</h4>
+                <p>Coming Soon!</p>
+            </a>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with col12:
+        st.markdown(
+            """
+            <a href="California_Coast" class="nav-button-2" style="text-decoration:none;">
+                <h4>Coastal California</h4>
+                <p>Coming Soon!</p>
+            </a>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    # Third Row of Links
+    col13, col14, col15 = st.columns(3)
+
+    with col13:
+        st.markdown(
+            """
+            <a href="Oregon_Coast" class="nav-button-2" style="text-decoration:none;">
+                <h4>Coastal Oregon</h4>
+                <p>Coming Soon!</p>
+            </a>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with col14:
+        st.markdown(
+            """
+            <a href="Washington_Coast" class="nav-button-2" style="text-decoration:none;">
+                <h4>Coastal Washington</h4>
+                <p>Coming Soon!</p>
+            </a>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("---")
+
+    # with col10:
+    #     st.markdown(
+    #         """
+    #         <a href="About" class="nav-button" style="text-decoration:none;">
+    #             <h4>About</h4>
+    #             <p>Learn more about the methodology and data sources.</p>
+    #         </a>
+    #         """,
+    #         unsafe_allow_html=True,
+    #     )
 
 st.markdown(
     """

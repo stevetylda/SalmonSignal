@@ -107,26 +107,37 @@ def load_dam_counts(dam_count_directory):
 
 
 def get_filters_for_dam_data(dam_counts_df):
-    column_list = ["DOY", "WOY", "MONTH", "DATE", "LOCATION", "SPECIES", "COUNT"]
+    column_list = [
+        "DOY",
+        "WOY",
+        "MONTH",
+        "DATE",
+        "LOCATION",
+        "SPECIES",
+        "COUNT",
+        "DOY_ZSCORE",
+    ]
     dam_counts_df = dam_counts_df[column_list]
 
     ### ----------------------
     ### Select X-Axis
-    x_axis_ = st.multiselect(
-        "Select Y-Axis",
+    x_axis_ = st.selectbox(
+        "Select X-Axis",
         dam_counts_df.columns,
-        max_selections=1,
+        # max_selections=1,
         default=["DOY"],
     )
     x_axis_select = x_axis_[0]
 
     ### ----------------------
     ### Select Y-Axis
-    y_axis_ = st.multiselect(
+    y_axis_ = st.selectbox(
         "Select Y-Axis",
         ["COUNT", "DOY_ZSCORE"],
-        max_selections=1,
-        default=["COUNT", ],
+        # max_selections=1,
+        default=[
+            "COUNT",
+        ],
     )
     y_axis_select = y_axis_[0]
 
@@ -387,9 +398,6 @@ elif current_page == "Analysis":
         st.markdown("---")
 
         st.subheader("Creel Reports")
-
-
-
 
         st.write("")
 

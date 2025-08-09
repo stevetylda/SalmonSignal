@@ -267,9 +267,8 @@ def plot_line_plot_columbia_dams(
         fig.add_scatter(
             x=plot_data[mask][x_axis_select],
             y=plot_data[mask][y_axis_select],
-            mode="lines+markers",
+            mode="lines",
             line=dict(width=2),
-            marker=dict(size=6),
             name=str(val),
             line_color=color_map.get(val, "blue"),
         )

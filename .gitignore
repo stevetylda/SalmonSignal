@@ -24,10 +24,6 @@ data/raw/RMPC/WDFW/processed/MA12_RMPC_CATCH.parquet
 data/raw/RMPC/WDFW/processed/RC042_WDFW_FULL.parquet
 data/raw/RMPC/WDFW/processed/RL042_WDFW_FULL.parquet
 data/processed/GIS/inland_waters/US_INLAND_WATERS.parquet
-data/processed/FPC_DAM_COUNTS/Little Goose_FPC_DAM_COUNTS.parquet
-data/processed/FPC_DAM_COUNTS/Lower Monumental_FPC_DAM_COUNTS.parquet
-data/processed/FPC_DAM_COUNTS/McNary_FPC_DAM_COUNTS.parquet
-data/processed/FPC_DAM_COUNTS/Wannapum_FPC_DAM_COUNTS.parquet
 data/processed/FPC_DAM_COUNTS/Rock Island_FPC_DAM_COUNTS.parquet
 data/processed/FPC_DAM_COUNTS/Lower Granite_FPC_DAM_COUNTS.parquet
 data/processed/FPC_DAM_COUNTS/Dalles_FPC_DAM_COUNTS.parquet

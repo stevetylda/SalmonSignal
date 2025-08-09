@@ -258,7 +258,7 @@ def plot_line_plot_columbia_dams(
     fig = go.Figure()
 
     # Default color cycle
-    default_colors = px.colors.qualitative.Plots
+    default_colors = px.colors.qualitative.Plotly
     if color_map is None:
         color_map = {
             uid: default_colors[i % len(default_colors)]

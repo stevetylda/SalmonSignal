@@ -33,6 +33,8 @@ def load_columbia_river_data():
         "../../data/processed/GIS/ocean/TERRITORIAL_COLUMBIA_MOUNT.parquet"
     ):
         columbia_path = "../data/processed/GIS/ocean/TERRITORIAL_COLUMBIA_MOUNT.parquet"
+    else:
+        st.write("PATHDOES NOT EXIST", os.getcwd())
 
     ## River Network
     if os.path.exists(
@@ -47,6 +49,8 @@ def load_columbia_river_data():
         network_path = (
             "../../data/processed/GIS/inland_waters/US_INLAND_WATERS_COLUMBIA_R.parquet"
         )
+    else:
+        st.write("PATHDOES NOT EXIST", os.getcwd())
 
     ## Dam Locations
     if os.path.exists(
@@ -61,6 +65,8 @@ def load_columbia_river_data():
         dam_path = (
             "../../data/processed/GIS/important_locations/columbia_snake_dams.parquet"
         )
+    else:
+        st.write("PATHDOES NOT EXIST", os.getcwd())
 
     # Data loading (unchanged)
     columbia_river_mouth = gpd.read_parquet(columbia_path).to_crs("EPSG:4326")

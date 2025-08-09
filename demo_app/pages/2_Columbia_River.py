@@ -106,7 +106,7 @@ def load_dam_counts(dam_count_directory):
 st.set_page_config(page_title="Columbia River Analysis", layout="wide")
 
 # Dam Counts Direcotry - FPC
-dam_count_directory = "../data/processed/FPC_DAM_COUNTS/"
+dam_count_directory = "./data/processed/FPC_DAM_COUNTS/"
 
 DAM_COLORS = {
     "Bonneville": "#ef476f",

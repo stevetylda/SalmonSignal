@@ -6,6 +6,7 @@ import os
 
 # Third-Party Modules
 import pandas as pd
+import numpy as np
 import streamlit as st
 from streamlit_option_menu import option_menu
 import geopandas as gpd
@@ -34,6 +35,7 @@ from src.visuals import (
 
 
 # Load Columbia River Spatial Layers
+@st.cache_data
 def load_columbia_river_data():
     # Define Pathing
     ## Marine Areas
@@ -90,18 +92,22 @@ def load_columbia_river_data():
 
 
 # Load Dam Counts
+@st.cache_data
 def load_dam_counts(dam_count_directory):
     if os.path.exists(dam_count_directory):
         dam_counts_df = pd.read_parquet(dam_count_directory)
 
+        # Standardize Columns
+        dam_counts_df.columns = dam_counts_df.columns.str.upper()
+
     elif os.path.exists(f"../{dam_count_directory}"):
         dam_counts_df = pd.read_parquet(f"../{dam_count_directory}")
 
+        # Standardize Columns
+        dam_counts_df.columns = dam_counts_df.columns.str.upper()
+
     else:
         return st.write("DAM COUNTS UNAVAILABLE")
-
-    # Standardize Columns
-    dam_counts_df.columns = dam_counts_df.columns.str.upper()
 
     return dam_counts_df
 
@@ -111,6 +117,8 @@ def get_filters_for_dam_data(dam_counts_df):
         "DOY",
         "WOY",
         "MONTH",
+        "YEAR",
+        "YEAR_MONTH",
         "DATE",
         "LOCATION",
         "SPECIES",
@@ -121,18 +129,18 @@ def get_filters_for_dam_data(dam_counts_df):
 
     ### ----------------------
     ### Select X-Axis
-    x_axis_ = st.selectbox(
+    x_axis_select = st.selectbox(
         "Select X-Axis",
         options=["DOY"]
         + [i for i in dam_counts_df.columns if i not in ["COUNT", "DOY_ZSCORE", "DOY"]],
-        index=1,
+        index=0,
     )
-    x_axis_select = x_axis_[0]
 
     ### ----------------------
     ### Select Y-Axis
-    y_axis_ = st.selectbox("Select Y-Axis", options=["COUNT", "DOY_ZSCORE"], index=1)
-    y_axis_select = y_axis_[0]
+    y_axis_select = st.selectbox(
+        "Select Y-Axis", options=["COUNT", "DOY_ZSCORE"], index=0
+    )
 
     ### ----------------------
     ### Select Aggregate Data?
@@ -148,7 +156,7 @@ def get_filters_for_dam_data(dam_counts_df):
         agg_options = st.multiselect(
             "Select Level of Aggregation",
             column_options_agg,
-            default=["DOY", "SPECIES"],
+            default=["SPECIES"],
         )
         agg_options = set(agg_options)
 
@@ -157,8 +165,14 @@ def get_filters_for_dam_data(dam_counts_df):
             ("Mean", "Median", "Sum", "Standard Deviation"),
         )
 
+        color_by_agg_option = st.selectbox(
+            "Color by Aggregation?",
+            list(agg_options),
+        )
+
     else:
         agg_options = set(column_options_agg)
+        color_by_agg_option = None
 
     ### ----------------------
     ### Select Aggregate Data?
@@ -204,13 +218,13 @@ def get_filters_for_dam_data(dam_counts_df):
     agg_list = list(set([x_axis_select]) | agg_options)
 
     if agg_func_option == "Mean":
-        plot_data = plot_data.groupby(agg_list, as_index=False)[y_axis_].mean()
+        plot_data = plot_data.groupby(agg_list, as_index=False)[y_axis_select].mean()
     elif agg_func_option == "Median":
-        plot_data = plot_data.groupby(agg_list, as_index=False)[y_axis_].median()
+        plot_data = plot_data.groupby(agg_list, as_index=False)[y_axis_select].median()
     elif agg_func_option == "Sum":
-        plot_data = plot_data.groupby(agg_list, as_index=False)[y_axis_].sum()
+        plot_data = plot_data.groupby(agg_list, as_index=False)[y_axis_select].sum()
     elif agg_func_option == "Standard Deviation":
-        plot_data = plot_data.groupby(agg_list, as_index=False)[y_axis_].std()
+        plot_data = plot_data.groupby(agg_list, as_index=False)[y_axis_select].std()
 
     plot_data = plot_data.sort_values(x_axis_select)
     plot_data = plot_data.reset_index(drop=True)
@@ -227,6 +241,7 @@ def get_filters_for_dam_data(dam_counts_df):
         x_axis_select,
         y_axis_select,
         agg_options,
+        color_by_agg_option,
     )
 
 
@@ -253,7 +268,7 @@ columbia_river_mouth, river_gdf, dams = load_columbia_river_data()
 
 # Load Dam Counts
 dam_counts_df = load_dam_counts(dam_count_directory)
-dam_counts_df = pd.merge(dam_counts_df, dams, on=["DAM"])
+dam_counts_df = pd.merge(dam_counts_df, dams.drop(columns=["geometry"]), on=["DAM"])
 
 #                                                         #
 # ------------------------------------------------------- #
@@ -331,6 +346,7 @@ elif current_page == "Analysis":
 
         st.subheader("Dam Investigation")
         st.caption("Change parameters below to investigate the data.")
+        # Data from here: https://www.fpc.org/web/apps/adultsalmon/R_adultcount_dataquery_results.php
 
         ### ----------------------
         ### Select Plotting Method
@@ -341,7 +357,7 @@ elif current_page == "Analysis":
             3: ":material/database:",
         }
         plot_selection = st.segmented_control(
-            "Tool",
+            "",
             options=option_map.keys(),
             format_func=lambda option: option_map[option],
             selection_mode="single",
@@ -362,26 +378,39 @@ elif current_page == "Analysis":
                     x_axis_select,
                     y_axis_select,
                     agg_options,
+                    color_by_agg_option,
                 ) = get_filters_for_dam_data(dam_counts_df)
 
             agree = st.checkbox("Proceed with Plotting Dam Counts")
 
             if agree:
                 # Plot Title - Dams
-                plot_title = f"Columbia River Dam Analysis: Species by {', '.join(agg_options).title()} over {', '.join(x_axis_select).title()}"
+                plot_title = f"Columbia River Dam Analysis: SPECIES by {', '.join(agg_options).upper()} over {x_axis_select.upper()}"
 
                 # Line Plot
                 if plot_selection == 0:
                     dam_plot = plot_line_plot_columbia_dams(
-                        plot_data, plot_title, x_axis_select, y_axis_select
+                        plot_data,
+                        plot_title,
+                        x_axis_select,
+                        y_axis_select,
+                        color_by_agg_option,
                     )
                 elif plot_selection == 1:
                     dam_plot = plot_bar_plot_columbia_dams(
-                        plot_data, plot_title, x_axis_select, y_axis_select
+                        plot_data,
+                        plot_title,
+                        x_axis_select,
+                        y_axis_select,
+                        color_by_agg_option,
                     )
                 elif plot_selection == 2:
                     dam_plot = plot_area_plot_columbia_dams(
-                        plot_data, plot_title, x_axis_select, y_axis_select
+                        plot_data,
+                        plot_title,
+                        x_axis_select,
+                        y_axis_select,
+                        color_by_agg_option,
                     )
 
                 st.plotly_chart(dam_plot, use_container_width=True)
@@ -396,20 +425,57 @@ elif current_page == "Analysis":
 
         st.markdown("---")
 
+        st.subheader("Catch Card Reports")
+
+        st.write("")
+
+        st.markdown("---")
+
     ################################
     ## ANALYSIS - PREDATION INSIGHTS
 
     with tabs[2]:
-        st.subheader("Predation Insights")
-        st.write("Piniped")
-        st.write("Harbor Seals")
-        st.write("Stellar Sea Lion")
-        st.write("California Sea Lion")
-        st.write("Humans")
-        st.write("Commercial Fishing")
-        st.write("Recreational Fishing")
+        st.header("Predation Insights")
+        st.markdown("---")
+
+        # ---------------------------- #
+        #  KILLER WHALE INVESTIGATION  #
+
+        st.subheader("Killer Whale Investigation - Residents, Transients (Biggs)")
+
+        # Filters will include buffer distance from mouth of columbia
+
+        # Filter to Species Type
+
+        # We need a custom coloring scheme
+
+        # Time series plot of counts over time
+
         st.write("Southern Resident Killer Whales (SRKW)")
         st.write("Transient Killer Whales (Biggs)")
+
+        st.write("")
+        st.markdown("---")
+
+        # ---------------------------- #
+        #     PINNIPED INVESTIGATION   #
+
+        st.subheader(
+            "Pinniped Investigation - California Sea Lions (CSL), Stellar Sea Lions (SSL), Harbour Seals"
+        )
+
+        st.write("")
+        st.markdown("---")
+
+        # ---------------------------- #
+        #      HUMAN INVESTIGATION     #
+
+        st.subheader(
+            "Human Investigation - Population Density, Built-Up Area, Docks/Ramps, Recreational Fishing, Commercial Fishing"
+        )
+
+        st.write("")
+        st.markdown("---")
 
     ################################
     ## ANALYSIS - PREY INSIGHTS

@@ -123,22 +123,15 @@ def get_filters_for_dam_data(dam_counts_df):
     ### Select X-Axis
     x_axis_ = st.selectbox(
         "Select X-Axis",
-        dam_counts_df.columns,
-        # max_selections=1,
-        default=["DOY"],
+        options=["DOY"]
+        + [i for i in dam_counts_df.columns if i not in ["COUNT", "DOY_ZSCORE", "DOY"]],
+        index=1,
     )
     x_axis_select = x_axis_[0]
 
     ### ----------------------
     ### Select Y-Axis
-    y_axis_ = st.selectbox(
-        "Select Y-Axis",
-        ["COUNT", "DOY_ZSCORE"],
-        # max_selections=1,
-        default=[
-            "COUNT",
-        ],
-    )
+    y_axis_ = st.selectbox("Select Y-Axis", options=["COUNT", "DOY_ZSCORE"], index=1)
     y_axis_select = y_axis_[0]
 
     ### ----------------------

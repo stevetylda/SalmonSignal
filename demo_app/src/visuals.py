@@ -227,11 +227,16 @@ def plot_plotly_mapbox_time_series(df, color_choice, species_choice):
     return fig
 
 
+import plotly.express as px
+import plotly.graph_objects as go
+import pandas as pd
+
+
 def plot_line_plot_columbia_dams(
     plot_data, plot_title, x_axis_select, y_axis_select, color_map=None
 ):
     """
-    Create a line plot for Columbia dams data with a date-time filter.
+    Create a line plot for Columbia dams data without date-time filter.
 
     Args:
         plot_data (pd.DataFrame): Input DataFrame with columns including UID, x_axis_select, and y_axis_select
@@ -282,7 +287,7 @@ def plot_line_plot_columbia_dams(
         paper_bgcolor="white",
         font=dict(family="Segoe UI, Arial, sans-serif", size=12, color="black"),
         xaxis=dict(
-            type="date",  # Set x-axis to date type
+            type="date",
             title=dict(
                 text=x_axis_select.replace("_", " ").title(),
                 font=dict(color="black", size=14),
@@ -296,26 +301,7 @@ def plot_line_plot_columbia_dams(
             ticks="outside",
             tickcolor="black",
             ticklen=5,
-            rangeselector=dict(
-                buttons=list(
-                    [
-                        dict(count=1, label="1m", step="month", stepmode="backward"),
-                        dict(count=6, label="6m", step="month", stepmode="backward"),
-                        dict(count=1, label="1y", step="year", stepmode="backward"),
-                        dict(count=5, label="5y", step="year", stepmode="backward"),
-                        dict(step="all", label="All"),
-                    ]
-                ),
-                bgcolor="white",
-                activecolor="lightgray",
-                font=dict(color="black"),
-                x=0,
-                xanchor="left",
-                y=1.1,
-                yanchor="top",
-            ),
-            rangeslider=dict(visible=True),  # Optional: Add a range slider
-            tickformat="%Y-%m-%d",  # Format for date display
+            tickformat="%Y-%m-%d",
         ),
         yaxis=dict(
             title=dict(
@@ -342,7 +328,7 @@ def plot_line_plot_columbia_dams(
             xanchor="left",
             yanchor="top",
         ),
-        margin=dict(l=50, r=150, t=100, b=50),  # Adjusted top margin for rangeselector
+        margin=dict(l=50, r=150, t=80, b=50),  # Adjusted top margin back
         title=dict(
             text=plot_title,
             font=dict(color="black", size=18, family="Segoe UI, Arial, sans-serif"),
@@ -359,7 +345,7 @@ def plot_bar_plot_columbia_dams(
     plot_data, plot_title, x_axis_select, y_axis_select, color_map=None
 ):
     """
-    Create a bar plot for Columbia dams data with a date-time filter.
+    Create a bar plot for Columbia dams data without date-time filter.
 
     Args:
         plot_data (pd.DataFrame): Input DataFrame with columns including UID, x_axis_select, and y_axis_select
@@ -407,7 +393,7 @@ def plot_bar_plot_columbia_dams(
         paper_bgcolor="white",
         font=dict(family="Segoe UI, Arial, sans-serif", size=12, color="black"),
         xaxis=dict(
-            type="date",  # Set x-axis to date type
+            type="date",
             title=dict(
                 text=x_axis_select.replace("_", " ").title(),
                 font=dict(color="black", size=14),
@@ -421,25 +407,6 @@ def plot_bar_plot_columbia_dams(
             ticks="outside",
             tickcolor="black",
             ticklen=5,
-            rangeselector=dict(
-                buttons=list(
-                    [
-                        dict(count=1, label="1m", step="month", stepmode="backward"),
-                        dict(count=6, label="6m", step="month", stepmode="backward"),
-                        dict(count=1, label="1y", step="year", stepmode="backward"),
-                        dict(count=5, label="5y", step="year", stepmode="backward"),
-                        dict(step="all", label="All"),
-                    ]
-                ),
-                bgcolor="white",
-                activecolor="lightgray",
-                font=dict(color="black"),
-                x=0,
-                xanchor="left",
-                y=1.1,
-                yanchor="top",
-            ),
-            rangeslider=dict(visible=True),  # Optional: Add a range slider
             tickformat="%Y-%m-%d",
         ),
         yaxis=dict(
@@ -467,7 +434,7 @@ def plot_bar_plot_columbia_dams(
             xanchor="left",
             yanchor="top",
         ),
-        margin=dict(l=50, r=150, t=100, b=50),
+        margin=dict(l=50, r=150, t=80, b=50),
         title=dict(
             text=plot_title,
             font=dict(color="black", size=18, family="Segoe UI, Arial, sans-serif"),
@@ -485,7 +452,7 @@ def plot_area_plot_columbia_dams(
     plot_data, plot_title, x_axis_select, y_axis_select, color_map=None
 ):
     """
-    Create an area plot for Columbia dams data with a date-time filter.
+    Create an area plot for Columbia dams data without date-time filter.
 
     Args:
         plot_data (pd.DataFrame): Input DataFrame with columns including UID, x_axis_select, and y_axis_select
@@ -535,7 +502,7 @@ def plot_area_plot_columbia_dams(
         paper_bgcolor="white",
         font=dict(family="Segoe UI, Arial, sans-serif", size=12, color="black"),
         xaxis=dict(
-            type="date",  # Set x-axis to date type
+            type="date",
             title=dict(
                 text=x_axis_select.replace("_", " ").title(),
                 font=dict(color="black", size=14),
@@ -549,25 +516,6 @@ def plot_area_plot_columbia_dams(
             ticks="outside",
             tickcolor="black",
             ticklen=5,
-            rangeselector=dict(
-                buttons=list(
-                    [
-                        dict(count=1, label="1m", step="month", stepmode="backward"),
-                        dict(count=6, label="6m", step="month", stepmode="backward"),
-                        dict(count=1, label="1y", step="year", stepmode="backward"),
-                        dict(count=5, label="5y", step="year", stepmode="backward"),
-                        dict(step="all", label="All"),
-                    ]
-                ),
-                bgcolor="white",
-                activecolor="lightgray",
-                font=dict(color="black"),
-                x=0,
-                xanchor="left",
-                y=1.1,
-                yanchor="top",
-            ),
-            rangeslider=dict(visible=True),  # Optional: Add a range slider
             tickformat="%Y-%m-%d",
         ),
         yaxis=dict(
@@ -595,7 +543,7 @@ def plot_area_plot_columbia_dams(
             xanchor="left",
             yanchor="top",
         ),
-        margin=dict(l=50, r=150, t=100, b=50),
+        margin=dict(l=50, r=150, t=80, b=50),
         title=dict(
             text=plot_title,
             font=dict(color="black", size=18, family="Segoe UI, Arial, sans-serif"),

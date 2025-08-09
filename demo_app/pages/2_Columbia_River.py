@@ -360,24 +360,27 @@ elif current_page == "Analysis":
                     agg_options,
                 ) = get_filters_for_dam_data(dam_counts_df)
 
-            # Plot Title - Dams
-            plot_title = f"Columbia River Dam Analysis: {', '.join(selected_species).title()} by {', '.join(agg_options).title()} over {', '.join(x_axis_select).title()}"
+            agree = st.checkbox("Proceed with Plotting Dam Counts")
 
-            # Line Plot
-            if plot_selection == 0:
-                dam_plot = plot_line_plot_columbia_dams(
-                    plot_data, plot_title, x_axis_select, y_axis_select
-                )
-            elif plot_selection == 1:
-                dam_plot = plot_bar_plot_columbia_dams(
-                    plot_data, plot_title, x_axis_select, y_axis_select
-                )
-            elif plot_selection == 2:
-                dam_plot = plot_area_plot_columbia_dams(
-                    plot_data, plot_title, x_axis_select, y_axis_select
-                )
+            if agree:
+                # Plot Title - Dams
+                plot_title = f"Columbia River Dam Analysis: {', '.join(selected_species).title()} by {', '.join(agg_options).title()} over {', '.join(x_axis_select).title()}"
 
-            st.plotly_chart(dam_plot, use_container_width=True)
+                # Line Plot
+                if plot_selection == 0:
+                    dam_plot = plot_line_plot_columbia_dams(
+                        plot_data, plot_title, x_axis_select, y_axis_select
+                    )
+                elif plot_selection == 1:
+                    dam_plot = plot_bar_plot_columbia_dams(
+                        plot_data, plot_title, x_axis_select, y_axis_select
+                    )
+                elif plot_selection == 2:
+                    dam_plot = plot_area_plot_columbia_dams(
+                        plot_data, plot_title, x_axis_select, y_axis_select
+                    )
+
+                st.plotly_chart(dam_plot, use_container_width=True)
 
         st.write("")
 

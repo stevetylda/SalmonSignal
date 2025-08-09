@@ -3,6 +3,11 @@ from streamlit_option_menu import option_menu
 from streamlit_folium import st_folium
 from src.utils import load_top_image_banner
 
+from src.auth import check_password_user
+
+if not check_password_user():
+    st.stop()
+    
 # Page Parameters
 page_tab_title = "Coastal Washington Analysis"
 page_name = "Coastal Washington - Coming Soon!"

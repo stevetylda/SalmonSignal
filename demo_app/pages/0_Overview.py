@@ -1,6 +1,11 @@
 import streamlit as st
 from src.utils import get_base64
 
+from src.auth import check_password_user
+
+if not check_password_user():
+    st.stop()
+
 st.set_page_config(page_title="SRKW Salmon Signals - Overview", layout="wide")
 
 # ---- Load and convert background image to base64 ----
@@ -125,84 +130,6 @@ st.markdown(
     margin-bottom: 0;
     color: #c0c0c0;
 }}
-# .nav-button {{
-#         min-height: 160px;
-#         max-width: 400px;
-#         width: 100%;
-#         margin: 10px auto; /* center horizontally */
-#         padding: 24px 20px;
-#         border-radius: 24px;
-#         border: 2.5px solid #CBD4C2;
-#         background: rgba(20, 30, 60, 0.3);
-#         color: #d0e6ff;
-#         font-weight: 600;
-#         font-size: 17px;
-#         cursor: pointer;
-#         transition: all 0.35s ease;
-#         text-align: center;
-#         box-shadow: none;
-#         display: flex;
-#         flex-direction: column;
-#         justify-content: center;
-#         align-items: center;
-#         text-decoration: none;
-#     }}
-#     .nav-button:hover {{
-#         border-image-source: linear-gradient(120deg, #c1c1c1, #e0e0e0, #c1c1c1);
-#         border-image-slice: 1;
-#         background: rgba(255, 255, 255, 0.15);
-#         color: #ffffff;
-#         box-shadow: 0 5px 28px rgba(255, 255, 255, 0.4);
-#         transform: translateY(-3px);
-#     }}
-#     .nav-button h4 {{
-#         margin: 0 0 10px 0;
-#         color: inherit;
-#     }}
-#     .nav-button p {{
-#         margin: 0;
-#         color: #aac9ff;
-#         font-size: 14px;
-#     }}
-# .nav-button-2 {{
-#     min-height: 160px;
-#     max-width: 400px;
-#     width: 100%;
-#     margin: 10px auto;
-#     padding: 24px 20px;
-#     border-radius: 24px;
-#     border: 2.5px dashed #999999;
-#     background: rgba(255, 255, 255, 0.04);
-#     color: #cccccc;
-#     font-weight: 600;
-#     font-size: 17px;
-#     text-align: center;
-#     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-#     transition: none;
-#     display: flex;
-#     flex-direction: column;
-#     justify-content: center;
-#     align-items: center;
-#     text-decoration: none;
-#     cursor: default;
-#     opacity: 0.7;
-#     }}
-#     .nav-button-2 hover {{
-#         transform: none;
-#         box-shadow: none;
-#         background: rgba(255, 255, 255, 0.04);
-#     }}
-#     .nav-button-2 h4 {{
-#         margin: 0 0 10px 0;
-#         color: inherit;
-#         font-weight: 700;
-#         font-size: 20px;
-#     }}
-#     .nav-button-2 p {{
-#         margin: 0;
-#         color: #aac9ff;
-#         font-size: 14px;
-#     }}
     /* Gradient Glow Ring on Nav Buttons (both .nav-button and .nav-button-2) */
     .nav-button, .nav-button-2 {{
         position: relative;
@@ -447,7 +374,7 @@ with st.container(key="main_box"):
     with col8:
         st.markdown(
             """
-            <a href="Columbia_River" class="nav-button" style="text-decoration:none;">
+            <a href="/Columbia_River" class="nav-button" style="text-decoration:none;">
                 <h4>Columbia River</h4>
                 <p>Explore migration timing, passage counts, and associated environmental factors.</p>
             </a>

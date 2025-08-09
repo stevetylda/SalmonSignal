@@ -26,6 +26,10 @@ from src.visuals import (
     plot_area_plot_columbia_dams,
 )
 
+from src.auth import check_password_user
+
+if not check_password_user():
+    st.stop()
 
 #                                                         #
 # ------------------------------------------------------- #

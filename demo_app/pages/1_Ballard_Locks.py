@@ -1,7 +1,9 @@
 import streamlit as st
-from streamlit_option_menu import option_menu
-from streamlit_folium import st_folium
 from src.utils import load_top_image_banner
+from src.auth import check_password_user
+
+if not check_password_user():
+    st.stop()
 
 # Page Parameters
 page_tab_title = "Ballard Locks Analysis"
@@ -75,10 +77,10 @@ st.markdown(
     .material-symbols-outlined {
         font-family: 'Material Symbols Outlined';
         font-variation-settings:
-          'FILL' 0,
-          'wght' 400,
-          'GRAD' 0,
-          'opsz' 48;
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 48;
         vertical-align: middle;
         font-size: 1.4em;
         margin: 0 0.3em;

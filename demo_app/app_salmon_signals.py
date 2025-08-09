@@ -2,9 +2,14 @@
 
 import streamlit as st
 
+from src.auth import check_password_user
+
+if not check_password_user():
+    st.stop()
+
 # ---- Load and convert background image to base64 ----
 st.set_page_config(
-    page_title="First app",
+    page_title="SRKW - Salmon Analysis",
     page_icon=":material/home:",
     initial_sidebar_state="collapsed",
     layout="wide",

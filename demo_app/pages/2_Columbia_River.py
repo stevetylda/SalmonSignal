@@ -27,10 +27,10 @@ from src.visuals import create_and_save_map
 def load_columbia_river_data():
     # Define Pathing
     ## Marine Areas
-    if os.path.exists("../data/processed/GIS/ocean/TERRITORIAL_COLUMBIA_MOUNT.parquet"):
-        columbia_path = "../data/processed/GIS/ocean/TERRITORIAL_COLUMBIA_MOUNT.parquet"
+    if os.path.exists("./data/processed/GIS/ocean/TERRITORIAL_COLUMBIA_MOUNT.parquet"):
+        columbia_path = "./data/processed/GIS/ocean/TERRITORIAL_COLUMBIA_MOUNT.parquet"
     elif os.path.exists(
-        "../../data/processed/GIS/ocean/TERRITORIAL_COLUMBIA_MOUNT.parquet"
+        "../data/processed/GIS/ocean/TERRITORIAL_COLUMBIA_MOUNT.parquet"
     ):
         columbia_path = "../data/processed/GIS/ocean/TERRITORIAL_COLUMBIA_MOUNT.parquet"
     else:
@@ -38,32 +38,32 @@ def load_columbia_river_data():
 
     ## River Network
     if os.path.exists(
+        "./data/processed/GIS/inland_waters/US_INLAND_WATERS_COLUMBIA_R.parquet"
+    ):
+        network_path = (
+            "./data/processed/GIS/inland_waters/US_INLAND_WATERS_COLUMBIA_R.parquet"
+        )
+    elif os.path.exists(
         "../data/processed/GIS/inland_waters/US_INLAND_WATERS_COLUMBIA_R.parquet"
     ):
         network_path = (
             "../data/processed/GIS/inland_waters/US_INLAND_WATERS_COLUMBIA_R.parquet"
-        )
-    elif os.path.exists(
-        "../../data/processed/GIS/inland_waters/US_INLAND_WATERS_COLUMBIA_R.parquet"
-    ):
-        network_path = (
-            "../../data/processed/GIS/inland_waters/US_INLAND_WATERS_COLUMBIA_R.parquet"
         )
     else:
         st.write("PATHDOES NOT EXIST", os.getcwd())
 
     ## Dam Locations
     if os.path.exists(
+        "./data/processed/GIS/important_locations/columbia_snake_dams.parquet"
+    ):
+        dam_path = (
+            "./data/processed/GIS/important_locations/columbia_snake_dams.parquet"
+        )
+    elif os.path.exists(
         "../data/processed/GIS/important_locations/columbia_snake_dams.parquet"
     ):
         dam_path = (
             "../data/processed/GIS/important_locations/columbia_snake_dams.parquet"
-        )
-    elif os.path.exists(
-        "../../data/processed/GIS/important_locations/columbia_snake_dams.parquet"
-    ):
-        dam_path = (
-            "../../data/processed/GIS/important_locations/columbia_snake_dams.parquet"
         )
     else:
         st.write("PATHDOES NOT EXIST", os.getcwd())

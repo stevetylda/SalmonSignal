@@ -24,6 +24,9 @@ from src.visuals import (
     plot_line_plot_columbia_dams,
     plot_bar_plot_columbia_dams,
     plot_area_plot_columbia_dams,
+    plot_line_plot_orca_sightings,
+    plot_bar_plot_orca_sightings,
+    plot_area_plot_orca_sightings,
 )
 
 from src.auth import check_password_user
@@ -116,6 +119,45 @@ def load_dam_counts(dam_count_directory):
     return dam_counts_df
 
 
+# Load Orca Sighting Counts
+@st.cache_data
+def load_orca_sightings(orca_sightings_count_directory):
+    if os.path.exists(orca_sightings_count_directory):
+        orca_sightings_df = pd.read_parquet(orca_sightings_count_directory)
+
+        # Standardize Columns
+        orca_sightings_df.columns = orca_sightings_df.columns.str.upper()
+
+        # Convert to Geospatial DataSet
+        orca_sightings_df = gpd.GeoDataFrame(
+            orca_sightings_df,
+            geometry=gpd.points_from_xy(
+                orca_sightings_df.LONGITUDE, orca_sightings_df.LATITUDE
+            ),
+            crs="EPSG:4326",  # WGS84 lat/lon
+        )
+
+    elif os.path.exists(f"../{orca_sightings_count_directory}"):
+        orca_sightings_df = pd.read_parquet(f"../{orca_sightings_count_directory}")
+
+        # Standardize Columns
+        orca_sightings_df.columns = orca_sightings_df.columns.str.upper()
+
+        # Convert to Geospatial DataSet
+        orca_sightings_df = gpd.GeoDataFrame(
+            orca_sightings_df,
+            geometry=gpd.points_from_xy(
+                orca_sightings_df.LONGITUDE, orca_sightings_df.LATITUDE
+            ),
+            crs="EPSG:4326",  # WGS84 lat/lon
+        )
+
+    else:
+        return st.write("ORCA SIGHTING DATA UNAVAILABLE")
+
+    return orca_sightings_df
+
+
 def get_filters_for_dam_data(dam_counts_df):
     column_list = [
         "DOY",
@@ -138,17 +180,18 @@ def get_filters_for_dam_data(dam_counts_df):
         options=["DOY"]
         + [i for i in dam_counts_df.columns if i not in ["COUNT", "DOY_ZSCORE", "DOY"]],
         index=0,
+        key=9800,
     )
 
     ### ----------------------
     ### Select Y-Axis
     y_axis_select = st.selectbox(
-        "Select Y-Axis", options=["COUNT", "DOY_ZSCORE"], index=0
+        "Select Y-Axis", options=["COUNT", "DOY_ZSCORE"], index=0, key=9801
     )
 
     ### ----------------------
     ### Select Aggregate Data?
-    aggregate = st.toggle("Aggregate Data?", value=True)
+    aggregate = st.toggle("Aggregate Data?", value=True, key=9802)
 
     ### ----------------------
     ### Select Aggregater Cols
@@ -161,17 +204,18 @@ def get_filters_for_dam_data(dam_counts_df):
             "Select Level of Aggregation",
             column_options_agg,
             default=["SPECIES"],
+            key=9803,
         )
         agg_options = set(agg_options)
 
         agg_func_option = st.selectbox(
             "Aggregation Function",
             ("Mean", "Median", "Sum", "Standard Deviation"),
+            key=9804,
         )
 
         color_by_agg_option = st.selectbox(
-            "Color by Aggregation?",
-            list(agg_options),
+            "Color by Aggregation?", list(agg_options), key=9805
         )
 
     else:
@@ -180,7 +224,7 @@ def get_filters_for_dam_data(dam_counts_df):
 
     ### ----------------------
     ### Select Aggregate Data?
-    data_filter = st.toggle("Filter Data?", value=False)
+    data_filter = st.toggle("Filter Data?", value=False, key=9806)
 
     ## Select Species
     species_options = sorted(list(dam_counts_df.SPECIES.unique()))
@@ -191,15 +235,11 @@ def get_filters_for_dam_data(dam_counts_df):
     if data_filter == True:
         # Species Select
         selected_species = st.multiselect(
-            "Select Species",
-            species_options,
-            default=species_options,
+            "Select Species", species_options, default=species_options, key=9807
         )
         # Dam Select
         selected_dams = st.multiselect(
-            "Select Location",
-            dam_options,
-            default=dam_options,
+            "Select Location", dam_options, default=dam_options, key=9808
         )
     else:
         selected_species = species_options
@@ -249,6 +289,185 @@ def get_filters_for_dam_data(dam_counts_df):
     )
 
 
+def get_filters_for_orca_sightings_data(orca_sightings_df):
+    column_list = [
+        "DOY",
+        "WOY",
+        "MONTH",
+        "YEAR",
+        "YEAR_MONTH",
+        "DATE",
+        "LATITUDE",
+        "LONGITUDE",
+        "POD_TYPE",
+        "POD_TAG",
+        "COUNT",
+        "geometry",
+    ]
+    # Subset Sightings Data
+    orca_sightings_df = orca_sightings_df[column_list]
+
+    ### ----------------------
+    ### Select X-Axis
+    x_axis_select = st.selectbox(
+        "Select X-Axis",
+        options=["DOY"]
+        + [
+            i
+            for i in orca_sightings_df.columns
+            if i not in ["COUNT", "LATITUDE", "LONGITUDE", "DOY"]
+        ],
+        index=0,
+        key=9900,
+    )
+
+    ### ----------------------
+    ### Select Y-Axis
+    y_axis_select = st.selectbox("Select Y-Axis", options=["COUNT"], index=0, key=9901)
+
+    ### ----------------------
+    ### Select Aggregate Data?
+    aggregate = st.toggle("Aggregate Data?", value=True, key=9902)
+
+    ### ----------------------
+    ### Select Aggregater Cols
+    column_options_agg = list(
+        set(orca_sightings_df.columns) - set(["LATITUDE", "LONGITUDE", "geometry"])
+    )
+
+    if aggregate == True:
+        agg_options = st.multiselect(
+            "Select Level of Aggregation",
+            column_options_agg,
+            default=["POD_TYPE"],
+            key=9703,
+        )
+        agg_options = set(agg_options)
+
+        agg_func_option = st.selectbox(
+            "Aggregation Function",
+            ("Mean", "Median", "Sum", "Standard Deviation"),
+            key=9704,
+        )
+
+        color_by_agg_option = st.selectbox(
+            "Color by Aggregation?", list(agg_options), key=9705
+        )
+
+    else:
+        agg_options = set(column_options_agg)
+        color_by_agg_option = None
+
+    ### ----------------------
+    ### Select Aggregate Data?
+    data_filter = st.toggle("Filter Data?", value=False, key=9706)
+
+    ## Select Pod Type
+    pod_type_options = sorted(list(orca_sightings_df.POD_TYPE.unique()))
+
+    ## Select Pod Tag
+    pod_tag_options = sorted(list(orca_sightings_df.POD_TAG.unique()))
+
+    if data_filter == True:
+        # Pod Type Select
+        selected_pod_type = st.multiselect(
+            "Select Pod Type",
+            pod_type_options,
+            default=pod_type_options,
+            key=9707,
+        )
+
+        # Pod Tag Select
+        selected_pod_tag = st.multiselect(
+            "Select Pod Tag", pod_tag_options, default=pod_tag_options, key=9708
+        )
+
+    else:
+        selected_pod_type = pod_type_options
+        selected_pod_tag = pod_tag_options
+
+    # Prepare Data for Plot
+    ## Subset Columbs
+    column_list = list(
+        set(["POD_TYPE", "POD_TAG", "geometry", y_axis_select, x_axis_select])
+        | agg_options
+    )
+    plot_data = orca_sightings_df[column_list]
+
+    ## Filter Data
+    plot_data = plot_data[
+        (plot_data.POD_TYPE.isin(selected_pod_type))
+        & (plot_data.POD_TAG.isin(selected_pod_tag))
+    ]
+
+    if len(plot_data) == 0:
+        st.warning("Filters Resulted in No Observations.", icon="⚠️")
+
+    ## Spatial Filter
+    spatial_filter = st.toggle("Spatially Filter Data?", value=True, key=9710)
+
+    if spatial_filter == True and len(plot_data) > 0:
+        selected_latitude = st.number_input("Set Latitude", value=46.2167)
+        selected_longitude = st.number_input("Set Longitude", value=-123.9333)
+        selected_buffer_distance = st.number_input(
+            "Define Radius of Filter (KM)", min_value=None, max_value=None, value=100
+        )
+
+        # Step 1: Make GeoDataFrame in EPSG:4326
+        area_filter = gpd.GeoDataFrame(
+            geometry=gpd.points_from_xy([selected_longitude], [selected_latitude]),
+            crs="EPSG:4326",
+        )
+        area_filter = area_filter.to_crs(epsg=32610)
+
+        # Step 3: Buffer in meters (buffer_km * 1000)
+        area_filter["geometry"] = area_filter.geometry.buffer(
+            selected_buffer_distance * 1000
+        )
+
+        # Step 4: Back to EPSG:4326 (lat/lon degrees)
+        area_filter = area_filter.to_crs(epsg=4326)
+
+        selected_area = area_filter.copy()
+        plot_data = plot_data.sjoin(area_filter)
+
+        if len(plot_data) == 0:
+            st.warning("Filters Resulted in No Observations.", icon="⚠️")
+
+    else:
+        selected_area = None
+
+    ## Aggregate
+    agg_list = list(set([x_axis_select]) | agg_options)
+
+    if agg_func_option == "Mean":
+        plot_data = plot_data.groupby(agg_list, as_index=False)[y_axis_select].mean()
+    elif agg_func_option == "Median":
+        plot_data = plot_data.groupby(agg_list, as_index=False)[y_axis_select].median()
+    elif agg_func_option == "Sum":
+        plot_data = plot_data.groupby(agg_list, as_index=False)[y_axis_select].sum()
+    elif agg_func_option == "Standard Deviation":
+        plot_data = plot_data.groupby(agg_list, as_index=False)[y_axis_select].std()
+
+    plot_data = plot_data.sort_values(x_axis_select)
+    plot_data = plot_data.reset_index(drop=True)
+
+    # Build UID for Plotting
+    col_for_uid = list(agg_options - set([y_axis_select, x_axis_select]))
+    plot_data["UID"] = plot_data[col_for_uid].astype(str).agg("-".join, axis=1)
+
+    return (
+        plot_data,
+        selected_pod_tag,
+        selected_pod_type,
+        selected_area,
+        x_axis_select,
+        y_axis_select,
+        agg_options,
+        color_by_agg_option,
+    )
+
+
 #                                                         #
 # ------------------------------------------------------- #
 
@@ -260,6 +479,9 @@ st.set_page_config(page_title="Columbia River Analysis", layout="wide")
 
 # Dam Counts Direcotry - FPC
 dam_count_directory = "./data/processed/FPC_DAM_COUNTS/"
+
+# Orca Sightings Directory - Acartia + TWM
+orca_sightings_count_directory = "./data/processed/ORCA_SIGHTINGS/"
 
 #                                                         #
 # ------------------------------------------------------- #
@@ -273,6 +495,10 @@ columbia_river_mouth, river_gdf, dams = load_columbia_river_data()
 # Load Dam Counts
 dam_counts_df = load_dam_counts(dam_count_directory)
 dam_counts_df = pd.merge(dam_counts_df, dams.drop(columns=["geometry"]), on=["DAM"])
+
+# Load Orca Sightings
+orca_sightings_df = load_orca_sightings(orca_sightings_count_directory)
+
 
 #                                                         #
 # ------------------------------------------------------- #
@@ -409,6 +635,7 @@ elif current_page == "Analysis":
             options=option_map.keys(),
             format_func=lambda option: option_map[option],
             selection_mode="single",
+            key=9701,
         )
 
         # Show Table
@@ -513,7 +740,76 @@ elif current_page == "Analysis":
         # ---------------------------- #
         #  KILLER WHALE INVESTIGATION  #
 
-        st.subheader("Killer Whale Investigation - Residents, Transients (Biggs)")
+        st.subheader(
+            'Killer Whale Investigation - Southern Residents ("SRKW"), Transients ("Biggs")'
+        )
+
+        ### Select Plotting Method
+        option_map = {
+            0: ":material/line_axis:",
+            1: ":material/bar_chart:",
+            2: ":material/area_chart:",
+            3: ":material/database:",
+        }
+        plot_selection = st.segmented_control(
+            "Change parameters below to investigate the data.",
+            options=option_map.keys(),
+            format_func=lambda option: option_map[option],
+            selection_mode="single",
+            key=9601,
+        )
+
+        # Show Table
+        if plot_selection == 3:
+            st.table(orca_sightings_df.head(25))
+
+        else:
+            # Data Selection for Plots
+            with st.expander("Data Selection"):
+                (
+                    plot_data,
+                    selected_pod_tag,
+                    selected_pod_type,
+                    selected_area,
+                    x_axis_select,
+                    y_axis_select,
+                    agg_options,
+                    color_by_agg_option,
+                ) = get_filters_for_orca_sightings_data(orca_sightings_df)
+
+            agree = st.checkbox("Proceed with Plotting Orca Sighting Counts", key=9700)
+
+            if agree:
+                # Plot Title - Dams
+                plot_title = f"Killer Whale Analysis: Pod by {', '.join(agg_options).upper()} over {x_axis_select.upper()}"
+
+                # Line Plot
+                if plot_selection == 0:
+                    orca_sights_plot = plot_line_plot_orca_sightings(
+                        plot_data,
+                        plot_title,
+                        x_axis_select,
+                        y_axis_select,
+                        color_by_agg_option,
+                    )
+                elif plot_selection == 1:
+                    orca_sights_plot = plot_bar_plot_orca_sightings(
+                        plot_data,
+                        plot_title,
+                        x_axis_select,
+                        y_axis_select,
+                        color_by_agg_option,
+                    )
+                elif plot_selection == 2:
+                    orca_sights_plot = plot_area_plot_orca_sightings(
+                        plot_data,
+                        plot_title,
+                        x_axis_select,
+                        y_axis_select,
+                        color_by_agg_option,
+                    )
+
+                st.plotly_chart(orca_sights_plot, use_container_width=True)
 
         # Filters will include buffer distance from mouth of columbia
 
@@ -522,9 +818,6 @@ elif current_page == "Analysis":
         # We need a custom coloring scheme
 
         # Time series plot of counts over time
-
-        st.write("Southern Resident Killer Whales (SRKW)")
-        st.write("Transient Killer Whales (Biggs)")
 
         st.write("")
         st.markdown("---")

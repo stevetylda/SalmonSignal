@@ -15,6 +15,11 @@ import plotly.express as px
 import plotly.graph_objects as go
 from shapely.geometry import mapping
 from streamlit.components.v1 import html
+import plotly.express as px
+import plotly.graph_objects as go
+import pandas as pd
+import numpy as np
+import matplotlib.colors as mcolors
 
 
 #                                                         #
@@ -228,13 +233,6 @@ def plot_plotly_mapbox_time_series(df, color_choice, species_choice):
     )
 
     return fig
-
-
-import plotly.express as px
-import plotly.graph_objects as go
-import pandas as pd
-import numpy as np
-import matplotlib.colors as mcolors
 
 
 def create_continuous_cmap(colors, n_colors=50):
@@ -551,6 +549,451 @@ def plot_line_plot_columbia_dams(
 
 
 def plot_bar_plot_columbia_dams(
+    plot_data, plot_title, x_axis_select, y_axis_select, color_by_agg_option=None
+):
+    """
+    Create a bar plot for Columbia dams data with dynamic color scaling.
+    """
+    if not isinstance(plot_data, pd.DataFrame):
+        raise ValueError("plot_data must be a pandas DataFrame")
+    if x_axis_select not in plot_data.columns or y_axis_select not in plot_data.columns:
+        raise ValueError("Selected axis columns must exist in the DataFrame")
+    if "UID" not in plot_data.columns:
+        raise ValueError("DataFrame must contain 'UID' column'")
+
+    # Handle YEAR_WEEK format if used
+    if x_axis_select == "YEAR_WEEK":
+        plot_data = plot_data.copy()
+        plot_data[x_axis_select] = pd.to_datetime(
+            plot_data[x_axis_select] + "-0", format="%Y-%U-%w", errors="coerce"
+        )
+
+    numeric_agg_options = ["DATE", "DOY", "WOY", "MONTH", "YEAR"]
+    categorical_agg_options = ["SPECIES", "DAM", "LOCATION"]
+
+    # Sort data by color_by_agg_option and x_axis_select if provided
+    if color_by_agg_option is not None:
+        plot_data = plot_data.sort_values([color_by_agg_option, x_axis_select])
+    else:
+        plot_data = plot_data.sort_values(x_axis_select)
+    plot_data = plot_data.reset_index(drop=True)
+
+    # Determine color scale
+    if color_by_agg_option in numeric_agg_options:
+        custom_colors = ["#0081a7", "#00afb9", "#fdfcdc", "#fed9b7", "#f07167"]
+        color_map = create_continuous_cmap(custom_colors, n_colors=50)
+        values = pd.to_numeric(plot_data[color_by_agg_option], errors="coerce").dropna()
+        if not values.empty:
+            min_val, max_val = values.min(), values.max()
+            if max_val > min_val:
+                color_indices = np.interp(
+                    values, [min_val, max_val], [0, len(color_map) - 1]
+                ).astype(int)
+                color_map = {
+                    uid: color_map[idx]
+                    for uid, idx in zip(plot_data["UID"], color_indices)
+                }
+            else:
+                color_map = {uid: color_map[0] for uid in plot_data["UID"].unique()}
+        else:
+            color_map = {uid: "#0081a7" for uid in plot_data["UID"].unique()}
+    elif color_by_agg_option in categorical_agg_options:
+        unique_uids = (
+            plot_data[["UID", color_by_agg_option]]
+            .drop_duplicates()
+            .sort_values(color_by_agg_option)["UID"]
+        )
+        color_map = {
+            uid: px.colors.qualitative.Dark24[i % len(px.colors.qualitative.Dark24)]
+            for i, uid in enumerate(unique_uids)
+        }
+    else:
+        color_map = {
+            uid: px.colors.qualitative.Plotly[i % len(px.colors.qualitative.Plotly)]
+            for i, uid in enumerate(plot_data["UID"].unique())
+        }
+
+    fig = go.Figure()
+
+    unique_uids = (
+        plot_data[["UID", color_by_agg_option]]
+        .drop_duplicates()
+        .sort_values(color_by_agg_option)["UID"]
+        if color_by_agg_option
+        else plot_data["UID"].unique()
+    )
+    for val in unique_uids:
+        mask = plot_data["UID"] == val
+        fig.add_bar(
+            x=plot_data[mask][x_axis_select],
+            y=plot_data[mask][y_axis_select],
+            name=str(val),
+            marker_color=color_map.get(val, "blue"),
+            opacity=0.8,
+        )
+
+    fig.update_layout(
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        font=dict(family="Segoe UI, Arial, sans-serif", size=12, color="black"),
+        xaxis=dict(
+            type="date" if x_axis_select in ["Datetime", "YEAR_WEEK"] else None,
+            title=dict(
+                text=x_axis_select.replace("_", " ").title(),
+                font=dict(color="black", size=14),
+            ),
+            tickfont=dict(color="black"),
+            showgrid=True,
+            gridcolor="lightgray",
+            zeroline=False,
+            showline=True,
+            linecolor="black",
+            ticks="outside",
+            tickcolor="black",
+            ticklen=5,
+            tickformat="%Y-%U" if x_axis_select == "YEAR_WEEK" else "%Y-%m-%d",
+        ),
+        yaxis=dict(
+            title=dict(
+                text=y_axis_select.replace("_", " ").title(),
+                font=dict(color="black", size=14),
+            ),
+            tickfont=dict(color="black"),
+            showgrid=True,
+            gridcolor="lightgray",
+            zeroline=False,
+            showline=True,
+            linecolor="black",
+            ticks="outside",
+            tickcolor="black",
+            ticklen=5,
+        ),
+        legend=dict(
+            bgcolor="rgba(255,255,255,0.8)",
+            bordercolor="lightgray",
+            borderwidth=1,
+            font=dict(color="black", size=11),
+            x=1.02,
+            y=1,
+            xanchor="left",
+            yanchor="top",
+        ),
+        margin=dict(l=50, r=150, t=80, b=50),
+        title=dict(
+            text=plot_title,
+            font=dict(color="black", size=18, family="Segoe UI, Arial, sans-serif"),
+            x=0.5,
+            xanchor="center",
+        ),
+        barmode="group",
+        hovermode="closest",
+    )
+
+    return fig
+
+
+####################### - plot_area_plot_orca_sightings
+
+
+def plot_area_plot_orca_sightings(
+    plot_data, plot_title, x_axis_select, y_axis_select, color_by_agg_option=None
+):
+    """
+    Create an area plot for Columbia dams data with dynamic color scaling, sorting areas by total size (smallest in front).
+
+    Args:
+        plot_data (pd.DataFrame): Input DataFrame with columns including UID, x_axis_select, y_axis_select
+        plot_title (str): Title of the plot
+        x_axis_select (str): Column name for x-axis
+        y_axis_select (str): Column name for y-axis
+        color_by_agg_option (str, optional): Aggregation option to color by (numeric or categorical)
+    """
+    if not isinstance(plot_data, pd.DataFrame):
+        raise ValueError("plot_data must be a pandas DataFrame")
+    if x_axis_select not in plot_data.columns or y_axis_select not in plot_data.columns:
+        raise ValueError("Selected axis columns must exist in the DataFrame")
+    if "UID" not in plot_data.columns:
+        raise ValueError("DataFrame must contain 'UID' column")
+
+    # Handle YEAR_WEEK format if used
+    if x_axis_select == "YEAR_WEEK":
+        plot_data = plot_data.copy()
+        plot_data[x_axis_select] = pd.to_datetime(
+            plot_data[x_axis_select] + "-0", format="%Y-%U-%w", errors="coerce"
+        )
+
+    numeric_agg_options = ["DATE", "DOY", "WOY", "MONTH", "YEAR"]
+    categorical_agg_options = ["SPECIES", "DAM", "LOCATION"]
+
+    # Sort data by color_by_agg_option and x_axis_select if provided
+    if color_by_agg_option is not None:
+        plot_data = plot_data.sort_values([color_by_agg_option, x_axis_select])
+    else:
+        plot_data = plot_data.sort_values(x_axis_select)
+    plot_data = plot_data.reset_index(drop=True)
+
+    # Calculate total y_axis_select values for each UID to sort areas (smallest in front)
+    uid_totals = plot_data.groupby("UID")[y_axis_select].sum().reset_index()
+    uid_totals = uid_totals.sort_values(
+        y_axis_select, ascending=False
+    )  # Descending so smallest is plotted last
+    unique_uids = uid_totals["UID"]
+
+    # Determine color scale
+    if color_by_agg_option in numeric_agg_options:
+        custom_colors = ["#0081a7", "#00afb9", "#fdfcdc", "#fed9b7", "#f07167"]
+        color_map = create_continuous_cmap(custom_colors, n_colors=50)
+        values = pd.to_numeric(plot_data[color_by_agg_option], errors="coerce").dropna()
+        if not values.empty:
+            min_val, max_val = values.min(), values.max()
+            if max_val > min_val:
+                color_indices = np.interp(
+                    values, [min_val, max_val], [0, len(color_map) - 1]
+                ).astype(int)
+                color_map = {
+                    uid: color_map[idx]
+                    for uid, idx in zip(plot_data["UID"], color_indices)
+                }
+            else:
+                color_map = {uid: color_map[0] for uid in plot_data["UID"].unique()}
+        else:
+            color_map = {uid: "#0081a7" for uid in plot_data["UID"].unique()}
+    elif color_by_agg_option in categorical_agg_options:
+        # Sort UIDs by color_by_agg_option for legend
+        unique_uids_color = (
+            plot_data[["UID", color_by_agg_option]]
+            .drop_duplicates()
+            .sort_values(color_by_agg_option)["UID"]
+        )
+        color_map = {
+            uid: px.colors.qualitative.Dark24[i % len(px.colors.qualitative.Dark24)]
+            for i, uid in enumerate(unique_uids_color)
+        }
+    else:
+        color_map = {
+            uid: px.colors.qualitative.Plotly[i % len(px.colors.qualitative.Plotly)]
+            for i, uid in enumerate(plot_data["UID"].unique())
+        }
+
+    fig = go.Figure()
+
+    # Iterate over UIDs sorted by total area (smallest last, in front)
+    for val in unique_uids:
+        mask = plot_data["UID"] == val
+        fig.add_scatter(
+            x=plot_data[mask][x_axis_select],
+            y=plot_data[mask][y_axis_select],
+            mode="lines",
+            fill="tozeroy",
+            name=str(val),
+            line_color=color_map.get(val, "blue"),
+            opacity=0.6,
+        )
+
+    fig.update_layout(
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        font=dict(family="Segoe UI, Arial, sans-serif", size=12, color="black"),
+        xaxis=dict(
+            type="date" if x_axis_select in ["Datetime", "YEAR_WEEK"] else None,
+            title=dict(
+                text=x_axis_select.replace("_", " ").title(),
+                font=dict(color="black", size=14),
+            ),
+            tickfont=dict(color="black"),
+            showgrid=True,
+            gridcolor="lightgray",
+            zeroline=False,
+            showline=True,
+            linecolor="black",
+            ticks="outside",
+            tickcolor="black",
+            ticklen=5,
+            tickformat="%Y-%U" if x_axis_select == "YEAR_WEEK" else "%Y-%m-%d",
+        ),
+        yaxis=dict(
+            title=dict(
+                text=y_axis_select.replace("_", " ").title(),
+                font=dict(color="black", size=14),
+            ),
+            tickfont=dict(color="black"),
+            showgrid=True,
+            gridcolor="lightgray",
+            zeroline=False,
+            showline=True,
+            linecolor="black",
+            ticks="outside",
+            tickcolor="black",
+            ticklen=5,
+        ),
+        legend=dict(
+            bgcolor="rgba(255,255,255,0.8)",
+            bordercolor="lightgray",
+            borderwidth=1,
+            font=dict(color="black", size=11),
+            x=1.02,
+            y=1,
+            xanchor="left",
+            yanchor="top",
+        ),
+        margin=dict(l=50, r=150, t=80, b=50),
+        title=dict(
+            text=plot_title,
+            font=dict(color="black", size=18, family="Segoe UI, Arial, sans-serif"),
+            x=0.5,
+            xanchor="center",
+        ),
+        hovermode="closest",
+    )
+
+    return fig
+
+
+def plot_line_plot_orca_sightings(
+    plot_data, plot_title, x_axis_select, y_axis_select, color_by_agg_option=None
+):
+    """
+    Create a line plot for Columbia dams data with dynamic color scaling.
+    """
+    if not isinstance(plot_data, pd.DataFrame):
+        raise ValueError("plot_data must be a pandas DataFrame")
+    if x_axis_select not in plot_data.columns or y_axis_select not in plot_data.columns:
+        raise ValueError("Selected axis columns must exist in the DataFrame")
+    if "UID" not in plot_data.columns:
+        raise ValueError("DataFrame must contain 'UID' column")
+
+    # Handle YEAR_WEEK format if used
+    if x_axis_select == "YEAR_WEEK":
+        plot_data = plot_data.copy()
+        plot_data[x_axis_select] = pd.to_datetime(
+            plot_data[x_axis_select] + "-0", format="%Y-%U-%w", errors="coerce"
+        )
+
+    numeric_agg_options = ["DATE", "DOY", "WOY", "MONTH", "YEAR"]
+    categorical_agg_options = ["SPECIES", "DAM", "LOCATION"]
+
+    # Sort data by color_by_agg_option and x_axis_select if provided
+    if color_by_agg_option is not None:
+        plot_data = plot_data.sort_values([color_by_agg_option, x_axis_select])
+    else:
+        plot_data = plot_data.sort_values(x_axis_select)
+    plot_data = plot_data.reset_index(drop=True)
+
+    # Determine color scale
+    if color_by_agg_option in numeric_agg_options:
+        custom_colors = ["#0081a7", "#00afb9", "#fdfcdc", "#fed9b7", "#f07167"]
+        color_map = create_continuous_cmap(custom_colors, n_colors=50)
+        values = pd.to_numeric(plot_data[color_by_agg_option], errors="coerce").dropna()
+        if not values.empty:
+            min_val, max_val = values.min(), values.max()
+            if max_val > min_val:
+                color_indices = np.interp(
+                    values, [min_val, max_val], [0, len(color_map) - 1]
+                ).astype(int)
+                color_map = {
+                    uid: color_map[idx]
+                    for uid, idx in zip(plot_data["UID"], color_indices)
+                }
+            else:
+                color_map = {uid: color_map[0] for uid in plot_data["UID"].unique()}
+        else:
+            color_map = {uid: "#0081a7" for uid in plot_data["UID"].unique()}
+    elif color_by_agg_option in categorical_agg_options:
+        unique_uids = (
+            plot_data[["UID", color_by_agg_option]]
+            .drop_duplicates()
+            .sort_values(color_by_agg_option)["UID"]
+        )
+        color_map = {
+            uid: px.colors.qualitative.Dark24[i % len(px.colors.qualitative.Dark24)]
+            for i, uid in enumerate(unique_uids)
+        }
+    else:
+        color_map = {
+            uid: px.colors.qualitative.Plotly[i % len(px.colors.qualitative.Plotly)]
+            for i, uid in enumerate(plot_data["UID"].unique())
+        }
+
+    fig = go.Figure()
+
+    unique_uids = (
+        plot_data[["UID", color_by_agg_option]]
+        .drop_duplicates()
+        .sort_values(color_by_agg_option)["UID"]
+        if color_by_agg_option
+        else plot_data["UID"].unique()
+    )
+    for val in unique_uids:
+        mask = plot_data["UID"] == val
+        fig.add_scatter(
+            x=plot_data[mask][x_axis_select],
+            y=plot_data[mask][y_axis_select],
+            mode="markers",
+            line=dict(width=2),
+            name=str(val),
+            line_color=color_map.get(val, "blue"),
+        )
+
+    fig.update_layout(
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        font=dict(family="Segoe UI, Arial, sans-serif", size=12, color="black"),
+        xaxis=dict(
+            type="date" if x_axis_select in ["Datetime", "YEAR_WEEK"] else None,
+            title=dict(
+                text=x_axis_select.replace("_", " ").title(),
+                font=dict(color="black", size=14),
+            ),
+            tickfont=dict(color="black"),
+            showgrid=True,
+            gridcolor="lightgray",
+            zeroline=False,
+            showline=True,
+            linecolor="black",
+            ticks="outside",
+            tickcolor="black",
+            ticklen=5,
+            tickformat="%Y-%U" if x_axis_select == "YEAR_WEEK" else "%Y-%m-%d",
+        ),
+        yaxis=dict(
+            title=dict(
+                text=y_axis_select.replace("_", " ").title(),
+                font=dict(color="black", size=14),
+            ),
+            tickfont=dict(color="black"),
+            showgrid=True,
+            gridcolor="lightgray",
+            zeroline=False,
+            showline=True,
+            linecolor="black",
+            ticks="outside",
+            tickcolor="black",
+            ticklen=5,
+        ),
+        legend=dict(
+            bgcolor="rgba(255,255,255,0.8)",
+            bordercolor="lightgray",
+            borderwidth=1,
+            font=dict(color="black", size=11),
+            x=1.02,
+            y=1,
+            xanchor="left",
+            yanchor="top",
+        ),
+        margin=dict(l=50, r=150, t=80, b=50),
+        title=dict(
+            text=plot_title,
+            font=dict(color="black", size=18, family="Segoe UI, Arial, sans-serif"),
+            x=0.5,
+            xanchor="center",
+        ),
+        hovermode="closest",
+    )
+
+    return fig
+
+
+def plot_bar_plot_orca_sightings(
     plot_data, plot_title, x_axis_select, y_axis_select, color_by_agg_option=None
 ):
     """

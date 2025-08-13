@@ -27,3 +27,10 @@ data/processed/GIS/inland_waters/US_INLAND_WATERS.parquet
 data/processed/GIS/marine_zones/WDFW_MARINE_AREAS_LARGE.parquet
 data/processed/GIS/ocean/TERRITORIAL_WATERS.parquet
 demo_app/src/__pycache__/visuals.cpython-310.pyc
+data/raw/red-bluff-diversion-dam-fish-counts/HISTORICAL COUNTS.xls
+data/raw/red-bluff-diversion-dam-fish-counts/MASTER RBDD TRAP DATA 4-15-21.mdb
+data/raw/red-bluff-diversion-dam-fish-counts/Summary of OLD RBDD Counts.xls
+demo_app/src/__pycache__/visuals.cpython-310.pyc
+data/raw/red-bluff-diversion-dam-fish-counts/Adult Chinook Salmon Counts at the RBDD Center Ladder, 1984 to 2008.pdf
+data/raw/bathymetry/GEBCO_12_Aug_2025_e9cdc1fe517e/gebco_2025_n54.524_s33.96_w-130.0_e-120.0.tif
+data/raw/red-bluff-diversion-dam-fish-counts/LADDER COUNTS.xls

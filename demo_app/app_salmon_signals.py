@@ -4,9 +4,6 @@ import streamlit as st
 
 from src.auth import check_password_user
 
-if not check_password_user():
-    st.stop()
-
 # ---- Load and convert background image to base64 ----
 st.set_page_config(
     page_title="SRKW - Salmon Analysis",
@@ -14,6 +11,10 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
     layout="wide",
 )
+
+if not check_password_user():
+    st.stop()
+
 
 st.markdown(
     """
@@ -41,16 +42,16 @@ pages = {
         )
     ],
     "Oceans - Analysis": [
-        st.Page(
-            f"../demo_app/pages/5_Coastal_British_Columbia.py",
-            title="Coastal - British Columbia (Coming Soon!)",
-            icon=":material/tsunami:",
-        ),
-        st.Page(
-            f"../demo_app/pages/6_Coastal_California.py",
-            title="Coastal - California (Coming Soon!)",
-            icon=":material/tsunami:",
-        ),
+        # st.Page(
+        #     f"../demo_app/pages/5_Coastal_British_Columbia.py",
+        #     title="Coastal - British Columbia (Coming Soon!)",
+        #     icon=":material/tsunami:",
+        # ),
+        # st.Page(
+        #     f"../demo_app/pages/6_Coastal_California.py",
+        #     title="Coastal - California (Coming Soon!)",
+        #     icon=":material/tsunami:",
+        # ),
         st.Page(
             f"../demo_app/pages/7_Coastal_Oregon.py",
             title="Coastal - Oregon (Coming Soon!)",
@@ -73,16 +74,16 @@ pages = {
             title="Columbia River",
             icon=":material/water:",
         ),
-        st.Page(
-            f"../demo_app/pages/3_Fraser_River.py",
-            title="Fraser River (Coming Soon!)",
-            icon=":material/water:",
-        ),
-        st.Page(
-            f"../demo_app/pages/4_Sacramento_River.py",
-            title="Sacramento River (Coming Soon!)",
-            icon=":material/water:",
-        ),
+        # st.Page(
+        #     f"../demo_app/pages/3_Fraser_River.py",
+        #     title="Fraser River (Coming Soon!)",
+        #     icon=":material/water:",
+        # ),
+        # st.Page(
+        #     f"../demo_app/pages/4_Sacramento_River.py",
+        #     title="Sacramento River (Coming Soon!)",
+        #     icon=":material/water:",
+        # ),
     ],
     "Learn More": [
         st.Page(
